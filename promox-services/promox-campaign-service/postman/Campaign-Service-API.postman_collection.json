@@ -1,0 +1,536 @@
+{
+  "info": {
+    "name": "Campaign Service API",
+    "description": "Complete API collection for PromoX Campaign Service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:9001/api",
+      "type": "string"
+    },
+    {
+      "key": "campaignId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. CRUD Operations",
+      "item": [
+        {
+          "name": "1. Create Campaign - Black Friday",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Campaign created successfully\", function () {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "    pm.expect(jsonData.data).to.have.property('id');",
+                  "    pm.collectionVariables.set('campaignId', jsonData.data.id);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Black Friday 2024\",\n  \"description\": \"Biggest sale of the year with up to 70% off on selected items\",\n  \"type\": \"SEASONAL\",\n  \"startDate\": \"2024-11-29T00:00:00\",\n  \"endDate\": \"2024-11-30T23:59:59\",\n  \"budget\": 100000.00,\n  \"priority\": 10,\n  \"targetAudience\": \"ALL\",\n  \"merchantId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/campaigns",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns"]
+            }
+          }
+        },
+        {
+          "name": "2. Create Campaign - VIP Loyalty",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"VIP Member Exclusive\",\n  \"description\": \"Special offers for our VIP members\",\n  \"type\": \"LOYALTY\",\n  \"startDate\": \"2024-12-01T00:00:00\",\n  \"endDate\": \"2024-12-31T23:59:59\",\n  \"budget\": 50000.00,\n  \"priority\": 9,\n  \"targetAudience\": \"VIP_USERS\",\n  \"merchantId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/campaigns",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns"]
+            }
+          }
+        },
+        {
+          "name": "3. Create Campaign - Flash Sale",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Weekend Flash Sale\",\n  \"description\": \"48-hour flash sale event\",\n  \"type\": \"FLASH\",\n  \"startDate\": \"2024-12-07T10:00:00\",\n  \"endDate\": \"2024-12-08T23:59:59\",\n  \"budget\": 25000.00,\n  \"priority\": 8,\n  \"targetAudience\": \"ALL\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/campaigns",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns"]
+            }
+          }
+        },
+        {
+          "name": "4. Get Campaign by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/campaigns/{{campaignId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns", "{{campaignId}}"]
+            }
+          }
+        },
+        {
+          "name": "5. Get All Campaigns (Paginated)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/campaigns?page=0&size=10&sortBy=createdAt&sortDir=DESC",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt"
+                },
+                {
+                  "key": "sortDir",
+                  "value": "DESC"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "6. Update Campaign",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Black Friday 2024 - Extended\",\n  \"description\": \"Extended! Biggest sale with additional 5% off\",\n  \"budget\": 120000.00,\n  \"priority\": 10\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/campaigns/{{campaignId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns", "{{campaignId}}"]
+            }
+          }
+        },
+        {
+          "name": "7. Delete Campaign",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/campaigns/{{campaignId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns", "{{campaignId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Status Management",
+      "item": [
+        {
+          "name": "1. Schedule Campaign",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/campaigns/{{campaignId}}/schedule",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns", "{{campaignId}}", "schedule"]
+            }
+          }
+        },
+        {
+          "name": "2. Activate Campaign",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/campaigns/{{campaignId}}/activate",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns", "{{campaignId}}", "activate"]
+            }
+          }
+        },
+        {
+          "name": "3. Pause Campaign",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/campaigns/{{campaignId}}/pause",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns", "{{campaignId}}", "pause"]
+            }
+          }
+        },
+        {
+          "name": "4. Resume Campaign",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/campaigns/{{campaignId}}/resume",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns", "{{campaignId}}", "resume"]
+            }
+          }
+        },
+        {
+          "name": "5. End Campaign",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/campaigns/{{campaignId}}/end",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns", "{{campaignId}}", "end"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Query Operations",
+      "item": [
+        {
+          "name": "1. Get Active Campaigns",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/campaigns/active",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns", "active"]
+            }
+          }
+        },
+        {
+          "name": "2. Get Scheduled Campaigns",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/campaigns/scheduled",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns", "scheduled"]
+            }
+          }
+        },
+        {
+          "name": "3. Get Campaigns by Status - DRAFT",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/campaigns/status/DRAFT",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns", "status", "DRAFT"]
+            }
+          }
+        },
+        {
+          "name": "4. Get Campaigns by Status - ACTIVE",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/campaigns/status/ACTIVE",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns", "status", "ACTIVE"]
+            }
+          }
+        },
+        {
+          "name": "5. Get Campaigns by Type - SEASONAL",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/campaigns/type/SEASONAL",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns", "type", "SEASONAL"]
+            }
+          }
+        },
+        {
+          "name": "6. Get Campaigns by Type - LOYALTY",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/campaigns/type/LOYALTY",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns", "type", "LOYALTY"]
+            }
+          }
+        },
+        {
+          "name": "7. Search Campaigns",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/campaigns/search?keyword=Black&page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns", "search"],
+              "query": [
+                {
+                  "key": "keyword",
+                  "value": "Black"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Complete Campaign Lifecycle",
+      "item": [
+        {
+          "name": "Step 1 - Create Draft Campaign",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set('lifecycleCampaignId', jsonData.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"New Year Mega Sale 2025\",\n  \"description\": \"Start the new year with amazing deals\",\n  \"type\": \"SEASONAL\",\n  \"startDate\": \"2025-01-01T00:00:00\",\n  \"endDate\": \"2025-01-07T23:59:59\",\n  \"budget\": 75000.00,\n  \"priority\": 9,\n  \"targetAudience\": \"ALL\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/campaigns",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns"]
+            }
+          }
+        },
+        {
+          "name": "Step 2 - Get Campaign Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/campaigns/{{lifecycleCampaignId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns", "{{lifecycleCampaignId}}"]
+            }
+          }
+        },
+        {
+          "name": "Step 3 - Update Campaign Budget",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"budget\": 100000.00,\n  \"description\": \"Start the new year with amazing deals - Budget increased!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/campaigns/{{lifecycleCampaignId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns", "{{lifecycleCampaignId}}"]
+            }
+          }
+        },
+        {
+          "name": "Step 4 - Schedule Campaign",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/campaigns/{{lifecycleCampaignId}}/schedule",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns", "{{lifecycleCampaignId}}", "schedule"]
+            }
+          }
+        },
+        {
+          "name": "Step 5 - Verify in Scheduled List",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/campaigns/scheduled",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns", "scheduled"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Validation Tests",
+      "item": [
+        {
+          "name": "1. Create Campaign - Missing Required Fields",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Validation error returned\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Campaign without name\",\n  \"type\": \"SEASONAL\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/campaigns",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns"]
+            }
+          }
+        },
+        {
+          "name": "2. Create Campaign - Invalid Dates",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Validation error for dates\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Invalid Date Campaign\",\n  \"type\": \"SEASONAL\",\n  \"startDate\": \"2024-12-31T23:59:59\",\n  \"endDate\": \"2024-12-01T00:00:00\",\n  \"budget\": 10000.00\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/campaigns",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns"]
+            }
+          }
+        },
+        {
+          "name": "3. Get Non-Existent Campaign",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"404 Not Found\", function () {",
+                  "    pm.response.to.have.status(404);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/campaigns/99999",
+              "host": ["{{baseUrl}}"],
+              "path": ["campaigns", "99999"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

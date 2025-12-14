@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: promox-analytics-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/promox_db
+    username: promox
+    password: promox123
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+server:
+  port: 9005
+
+logging:
+  level:
+    com.promox.analytics: DEBUG

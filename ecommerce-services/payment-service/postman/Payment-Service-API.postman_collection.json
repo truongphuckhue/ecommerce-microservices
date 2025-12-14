@@ -1,0 +1,62 @@
+{
+  "info": {
+    "name": "Payment Service API",
+    "description": "Payment processing with gateway integration",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Payment",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8004/api/payments/{{orderId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8004",
+          "path": ["api", "payments", "{{orderId}}"]
+        }
+      }
+    },
+    {
+      "name": "Process Payment",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"orderId\": 1,\n  \"amount\": 1999.98,\n  \"currency\": \"USD\",\n  \"paymentMethod\": \"CREDIT_CARD\",\n  \"cardNumber\": \"4111111111111111\",\n  \"cardHolder\": \"John Doe\",\n  \"expiryDate\": \"12/25\",\n  \"cvv\": \"123\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8004/api/payments/process",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8004",
+          "path": ["api", "payments", "process"]
+        }
+      }
+    },
+    {
+      "name": "Refund Payment",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"paymentId\": 1,\n  \"amount\": 1999.98,\n  \"reason\": \"Customer request\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8004/api/payments/refund",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8004",
+          "path": ["api", "payments", "refund"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {"key": "orderId", "value": "1"}
+  ]
+}

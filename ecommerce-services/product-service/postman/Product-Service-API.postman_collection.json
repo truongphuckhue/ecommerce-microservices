@@ -1,0 +1,145 @@
+{
+  "info": {
+    "name": "Product Service API",
+    "description": "Product catalog management with advanced search",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get All Products",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8001/api/products?page=0&size=10",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8001",
+          "path": ["api", "products"],
+          "query": [
+            {"key": "page", "value": "0"},
+            {"key": "size", "value": "10"}
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Product by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8001/api/products/{{productId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8001",
+          "path": ["api", "products", "{{productId}}"]
+        }
+      }
+    },
+    {
+      "name": "Create Product",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"iPhone 15 Pro\",\n  \"description\": \"Latest Apple smartphone\",\n  \"price\": 999.99,\n  \"categoryId\": 1,\n  \"stock\": 100,\n  \"imageUrl\": \"https://example.com/iphone.jpg\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8001/api/products",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8001",
+          "path": ["api", "products"]
+        }
+      }
+    },
+    {
+      "name": "Update Product",
+      "request": {
+        "method": "PUT",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"iPhone 15 Pro Max\",\n  \"description\": \"Latest Apple flagship\",\n  \"price\": 1199.99,\n  \"stock\": 50\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8001/api/products/{{productId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8001",
+          "path": ["api", "products", "{{productId}}"]
+        }
+      }
+    },
+    {
+      "name": "Delete Product",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8001/api/products/{{productId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8001",
+          "path": ["api", "products", "{{productId}}"]
+        }
+      }
+    },
+    {
+      "name": "Search Products",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8001/api/products/search?keyword=iphone&minPrice=500&maxPrice=1500",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8001",
+          "path": ["api", "products", "search"],
+          "query": [
+            {"key": "keyword", "value": "iphone"},
+            {"key": "minPrice", "value": "500"},
+            {"key": "maxPrice", "value": "1500"}
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get All Categories",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8001/api/categories",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8001",
+          "path": ["api", "categories"]
+        }
+      }
+    },
+    {
+      "name": "Create Category",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Electronics\",\n  \"description\": \"Electronic devices and gadgets\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8001/api/categories",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8001",
+          "path": ["api", "categories"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {"key": "productId", "value": "1"}
+  ]
+}

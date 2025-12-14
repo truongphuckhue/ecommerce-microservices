@@ -1,0 +1,93 @@
+{
+  "dashboard": {
+    "title": "System Health - All Services",
+    "tags": ["monitoring", "health", "overview"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Services Up/Down Status",
+        "type": "stat",
+        "targets": [{
+          "expr": "up{job=~\".+-service\"}",
+          "legendFormat": "{{service}}"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              {"value": 1, "text": "UP", "color": "green"},
+              {"value": 0, "text": "DOWN", "color": "red"}
+            ]
+          }
+        },
+        "gridPos": {"h": 4, "w": 24, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Request Rate (req/s)",
+        "type": "graph",
+        "targets": [{
+          "expr": "sum by (service) (rate(http_server_requests_seconds_count[5m]))",
+          "legendFormat": "{{service}}"
+        }],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4}
+      },
+      {
+        "id": 3,
+        "title": "Error Rate (%)",
+        "type": "graph",
+        "targets": [{
+          "expr": "sum by (service) (service:http_errors:percentage5m)",
+          "legendFormat": "{{service}}"
+        }],
+        "yaxes": [{"format": "percent"}],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4}
+      },
+      {
+        "id": 4,
+        "title": "P95 Response Time (seconds)",
+        "type": "graph",
+        "targets": [{
+          "expr": "service:http_request_duration:p95",
+          "legendFormat": "{{service}}"
+        }],
+        "yaxes": [{"format": "s"}],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12}
+      },
+      {
+        "id": 5,
+        "title": "CPU Usage (%)",
+        "type": "graph",
+        "targets": [{
+          "expr": "rate(process_cpu_seconds_total[5m]) * 100",
+          "legendFormat": "{{service}}"
+        }],
+        "yaxes": [{"format": "percent", "max": 100}],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12}
+      },
+      {
+        "id": 6,
+        "title": "Memory Usage (Heap %)",
+        "type": "graph",
+        "targets": [{
+          "expr": "(jvm_memory_used_bytes{area=\"heap\"} / jvm_memory_max_bytes{area=\"heap\"}) * 100",
+          "legendFormat": "{{service}}"
+        }],
+        "yaxes": [{"format": "percent", "max": 100}],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 20}
+      },
+      {
+        "id": 7,
+        "title": "Active Threads",
+        "type": "graph",
+        "targets": [{
+          "expr": "jvm_threads_live_threads",
+          "legendFormat": "{{service}}"
+        }],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 20}
+      }
+    ],
+    "refresh": "10s",
+    "time": {"from": "now-1h", "to": "now"}
+  }
+}

@@ -1,0 +1,340 @@
+{
+  "info": {
+    "name": "Coupon Service API",
+    "description": "Complete API collection for PromoX Coupon Service with bulk generation and redemption tracking",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "baseUrl", "value": "http://localhost:9004/api", "type": "string"},
+    {"key": "couponId", "value": "", "type": "string"},
+    {"key": "couponCode", "value": "", "type": "string"},
+    {"key": "batchId", "value": "", "type": "string"},
+    {"key": "userId", "value": "1", "type": "string"}
+  ],
+  "item": [
+    {
+      "name": "1. CRUD Operations",
+      "item": [
+        {
+          "name": "1. Create Coupon - Percentage Off",
+          "event": [{"listen": "test", "script": {"exec": ["var jsonData = pm.response.json();", "pm.collectionVariables.set('couponId', jsonData.data.id);", "pm.collectionVariables.set('couponCode', jsonData.data.code);"]}}],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"code\": \"SUMMER2024\",\n  \"campaignId\": 1,\n  \"couponType\": \"GENERIC\",\n  \"discountType\": \"PERCENTAGE\",\n  \"discountValue\": 20,\n  \"maxDiscountAmount\": 50,\n  \"minOrderValue\": 100,\n  \"validFrom\": \"2024-12-01T00:00:00\",\n  \"validTo\": \"2024-12-31T23:59:59\",\n  \"usageLimit\": 1000,\n  \"perUserLimit\": 3\n}"},
+            "url": {"raw": "{{baseUrl}}/coupons", "host": ["{{baseUrl}}"], "path": ["coupons"]}
+          }
+        },
+        {
+          "name": "2. Create Coupon - Fixed Amount",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"code\": \"WELCOME100\",\n  \"campaignId\": 1,\n  \"couponType\": \"FIRST_ORDER\",\n  \"discountType\": \"FIXED\",\n  \"discountValue\": 100,\n  \"minOrderValue\": 500,\n  \"validFrom\": \"2024-12-01T00:00:00\",\n  \"validTo\": \"2025-01-31T23:59:59\",\n  \"usageLimit\": 500,\n  \"perUserLimit\": 1\n}"},
+            "url": {"raw": "{{baseUrl}}/coupons", "host": ["{{baseUrl}}"], "path": ["coupons"]}
+          }
+        },
+        {
+          "name": "3. Get Coupon by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/coupons/{{couponId}}", "host": ["{{baseUrl}}"], "path": ["coupons", "{{couponId}}"]}
+          }
+        },
+        {
+          "name": "4. Get Coupon by Code",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/coupons/code/{{couponCode}}", "host": ["{{baseUrl}}"], "path": ["coupons", "code", "{{couponCode}}"]}
+          }
+        },
+        {
+          "name": "5. Get All Coupons (Paginated)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/coupons?page=0&size=10&sortBy=createdAt&sortDir=DESC", "host": ["{{baseUrl}}"], "path": ["coupons"], "query": [{"key": "page", "value": "0"}, {"key": "size", "value": "10"}, {"key": "sortBy", "value": "createdAt"}, {"key": "sortDir", "value": "DESC"}]}
+          }
+        },
+        {
+          "name": "6. Update Coupon",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"discountValue\": 25,\n  \"maxDiscountAmount\": 75\n}"},
+            "url": {"raw": "{{baseUrl}}/coupons/{{couponId}}", "host": ["{{baseUrl}}"], "path": ["coupons", "{{couponId}}"]}
+          }
+        },
+        {
+          "name": "7. Delete Coupon",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/coupons/{{couponId}}", "host": ["{{baseUrl}}"], "path": ["coupons", "{{couponId}}"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Bulk Generation",
+      "item": [
+        {
+          "name": "1. Generate 100 Bulk Coupons",
+          "event": [{"listen": "test", "script": {"exec": ["var jsonData = pm.response.json();", "pm.collectionVariables.set('batchId', jsonData.data.batchId);", "if (jsonData.data.couponCodes && jsonData.data.couponCodes.length > 0) {", "  pm.collectionVariables.set('couponCode', jsonData.data.couponCodes[0]);", "}"]}}],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"prefix\": \"VIP\",\n  \"quantity\": 100,\n  \"codeLength\": 12,\n  \"campaignId\": 1,\n  \"couponType\": \"LOYALTY\",\n  \"discountType\": \"PERCENTAGE\",\n  \"discountValue\": 15,\n  \"maxDiscountAmount\": 30,\n  \"minOrderValue\": 50,\n  \"validFrom\": \"2024-12-01T00:00:00\",\n  \"validTo\": \"2024-12-31T23:59:59\",\n  \"usageLimit\": 1,\n  \"perUserLimit\": 1,\n  \"createdBy\": \"admin\"\n}"},
+            "url": {"raw": "{{baseUrl}}/coupons/bulk", "host": ["{{baseUrl}}"], "path": ["coupons", "bulk"]}
+          }
+        },
+        {
+          "name": "2. Generate Birthday Coupons",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"prefix\": \"BDAY\",\n  \"quantity\": 50,\n  \"codeLength\": 10,\n  \"campaignId\": 2,\n  \"couponType\": \"BIRTHDAY\",\n  \"discountType\": \"FIXED\",\n  \"discountValue\": 50,\n  \"minOrderValue\": 200,\n  \"validFrom\": \"2024-12-01T00:00:00\",\n  \"validTo\": \"2025-12-31T23:59:59\",\n  \"usageLimit\": 1,\n  \"perUserLimit\": 1,\n  \"createdBy\": \"birthday-bot\"\n}"},
+            "url": {"raw": "{{baseUrl}}/coupons/bulk", "host": ["{{baseUrl}}"], "path": ["coupons", "bulk"]}
+          }
+        },
+        {
+          "name": "3. Get Coupons by Batch",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/coupons/batch/{{batchId}}", "host": ["{{baseUrl}}"], "path": ["coupons", "batch", "{{batchId}}"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Validation & Redemption",
+      "item": [
+        {
+          "name": "1. Validate Coupon - Success",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"couponCode\": \"{{couponCode}}\",\n  \"userId\": 1,\n  \"orderAmount\": 150.00\n}"},
+            "url": {"raw": "{{baseUrl}}/coupons/validate", "host": ["{{baseUrl}}"], "path": ["coupons", "validate"]}
+          }
+        },
+        {
+          "name": "2. Validate Coupon - Below Min Order",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"couponCode\": \"{{couponCode}}\",\n  \"userId\": 1,\n  \"orderAmount\": 30.00\n}"},
+            "url": {"raw": "{{baseUrl}}/coupons/validate", "host": ["{{baseUrl}}"], "path": ["coupons", "validate"]}
+          }
+        },
+        {
+          "name": "3. Redeem Coupon - Success",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"couponCode\": \"{{couponCode}}\",\n  \"userId\": 1,\n  \"orderId\": \"ORD-12345\",\n  \"orderAmount\": 150.00,\n  \"ipAddress\": \"192.168.1.1\"\n}"},
+            "url": {"raw": "{{baseUrl}}/coupons/redeem", "host": ["{{baseUrl}}"], "path": ["coupons", "redeem"]}
+          }
+        },
+        {
+          "name": "4. Redeem Coupon - Already Used",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"couponCode\": \"{{couponCode}}\",\n  \"userId\": 1,\n  \"orderId\": \"ORD-12346\",\n  \"orderAmount\": 150.00\n}"},
+            "url": {"raw": "{{baseUrl}}/coupons/redeem", "host": ["{{baseUrl}}"], "path": ["coupons", "redeem"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Status Management",
+      "item": [
+        {
+          "name": "1. Activate Coupon",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/coupons/{{couponId}}/activate", "host": ["{{baseUrl}}"], "path": ["coupons", "{{couponId}}", "activate"]}
+          }
+        },
+        {
+          "name": "2. Deactivate Coupon",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/coupons/{{couponId}}/deactivate", "host": ["{{baseUrl}}"], "path": ["coupons", "{{couponId}}", "deactivate"]}
+          }
+        },
+        {
+          "name": "3. Revoke Coupon",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/coupons/{{couponId}}/revoke", "host": ["{{baseUrl}}"], "path": ["coupons", "{{couponId}}", "revoke"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Query Operations",
+      "item": [
+        {
+          "name": "1. Get Active Coupons",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/coupons/active", "host": ["{{baseUrl}}"], "path": ["coupons", "active"]}
+          }
+        },
+        {
+          "name": "2. Get Coupons by Campaign",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/coupons/campaign/1", "host": ["{{baseUrl}}"], "path": ["coupons", "campaign", "1"]}
+          }
+        },
+        {
+          "name": "3. Get Coupons by Status - ACTIVE",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/coupons/status/ACTIVE", "host": ["{{baseUrl}}"], "path": ["coupons", "status", "ACTIVE"]}
+          }
+        },
+        {
+          "name": "4. Get Coupons for User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/coupons/user/1", "host": ["{{baseUrl}}"], "path": ["coupons", "user", "1"]}
+          }
+        },
+        {
+          "name": "5. Search Coupons",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/coupons/search?keyword=VIP&page=0&size=10", "host": ["{{baseUrl}}"], "path": ["coupons", "search"], "query": [{"key": "keyword", "value": "VIP"}, {"key": "page", "value": "0"}, {"key": "size", "value": "10"}]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Redemption History",
+      "item": [
+        {
+          "name": "1. Get Coupon Redemption History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/coupons/{{couponId}}/redemptions?page=0&size=10", "host": ["{{baseUrl}}"], "path": ["coupons", "{{couponId}}", "redemptions"], "query": [{"key": "page", "value": "0"}, {"key": "size", "value": "10"}]}
+          }
+        },
+        {
+          "name": "2. Get User Redemptions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/coupons/user/1/redemptions?page=0&size=10", "host": ["{{baseUrl}}"], "path": ["coupons", "user", "1", "redemptions"], "query": [{"key": "page", "value": "0"}, {"key": "size", "value": "10"}]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Complete Coupon Lifecycle",
+      "item": [
+        {
+          "name": "Step 1 - Create Coupon",
+          "event": [{"listen": "test", "script": {"exec": ["var jsonData = pm.response.json();", "pm.collectionVariables.set('lifecycleCouponId', jsonData.data.id);", "pm.collectionVariables.set('lifecycleCouponCode', jsonData.data.code);"]}}],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"code\": \"LIFECYCLE20\",\n  \"couponType\": \"GENERIC\",\n  \"discountType\": \"PERCENTAGE\",\n  \"discountValue\": 20,\n  \"maxDiscountAmount\": 40,\n  \"minOrderValue\": 100,\n  \"validFrom\": \"2024-12-01T00:00:00\",\n  \"validTo\": \"2024-12-31T23:59:59\",\n  \"usageLimit\": 10,\n  \"perUserLimit\": 2\n}"},
+            "url": {"raw": "{{baseUrl}}/coupons", "host": ["{{baseUrl}}"], "path": ["coupons"]}
+          }
+        },
+        {
+          "name": "Step 2 - Validate Coupon",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"couponCode\": \"{{lifecycleCouponCode}}\",\n  \"userId\": 1,\n  \"orderAmount\": 200.00\n}"},
+            "url": {"raw": "{{baseUrl}}/coupons/validate", "host": ["{{baseUrl}}"], "path": ["coupons", "validate"]}
+          }
+        },
+        {
+          "name": "Step 3 - Redeem Coupon (User 1)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"couponCode\": \"{{lifecycleCouponCode}}\",\n  \"userId\": 1,\n  \"orderId\": \"ORD-LIFE-001\",\n  \"orderAmount\": 200.00\n}"},
+            "url": {"raw": "{{baseUrl}}/coupons/redeem", "host": ["{{baseUrl}}"], "path": ["coupons", "redeem"]}
+          }
+        },
+        {
+          "name": "Step 4 - Redeem Again (User 2)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"couponCode\": \"{{lifecycleCouponCode}}\",\n  \"userId\": 2,\n  \"orderId\": \"ORD-LIFE-002\",\n  \"orderAmount\": 150.00\n}"},
+            "url": {"raw": "{{baseUrl}}/coupons/redeem", "host": ["{{baseUrl}}"], "path": ["coupons", "redeem"]}
+          }
+        },
+        {
+          "name": "Step 5 - Check Redemption History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/coupons/{{lifecycleCouponId}}/redemptions", "host": ["{{baseUrl}}"], "path": ["coupons", "{{lifecycleCouponId}}", "redemptions"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Validation Tests",
+      "item": [
+        {
+          "name": "1. Invalid Code Format",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"code\": \"invalid code with spaces\",\n  \"couponType\": \"GENERIC\",\n  \"discountType\": \"PERCENTAGE\",\n  \"discountValue\": 10,\n  \"validFrom\": \"2024-12-01T00:00:00\",\n  \"validTo\": \"2024-12-31T23:59:59\"\n}"},
+            "url": {"raw": "{{baseUrl}}/coupons", "host": ["{{baseUrl}}"], "path": ["coupons"]}
+          }
+        },
+        {
+          "name": "2. Invalid Percentage (>100)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"code\": \"INVALID150\",\n  \"couponType\": \"GENERIC\",\n  \"discountType\": \"PERCENTAGE\",\n  \"discountValue\": 150,\n  \"validFrom\": \"2024-12-01T00:00:00\",\n  \"validTo\": \"2024-12-31T23:59:59\"\n}"},
+            "url": {"raw": "{{baseUrl}}/coupons", "host": ["{{baseUrl}}"], "path": ["coupons"]}
+          }
+        },
+        {
+          "name": "3. Invalid Date Range",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"code\": \"BADDATE\",\n  \"couponType\": \"GENERIC\",\n  \"discountType\": \"FIXED\",\n  \"discountValue\": 10,\n  \"validFrom\": \"2024-12-31T00:00:00\",\n  \"validTo\": \"2024-12-01T23:59:59\"\n}"},
+            "url": {"raw": "{{baseUrl}}/coupons", "host": ["{{baseUrl}}"], "path": ["coupons"]}
+          }
+        },
+        {
+          "name": "4. Validate Non-Existent Coupon",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {"mode": "raw", "raw": "{\n  \"couponCode\": \"NOTEXIST\",\n  \"userId\": 1,\n  \"orderAmount\": 100.00\n}"},
+            "url": {"raw": "{{baseUrl}}/coupons/validate", "host": ["{{baseUrl}}"], "path": ["coupons", "validate"]}
+          }
+        }
+      ]
+    }
+  ]
+}

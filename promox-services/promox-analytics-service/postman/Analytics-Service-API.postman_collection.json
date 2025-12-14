@@ -1,0 +1,334 @@
+{
+  "info": {
+    "name": "Analytics Service API",
+    "description": "Complete API collection for PromoX Analytics Service with reporting and metrics",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "baseUrl", "value": "http://localhost:9006/api", "type": "string"},
+    {"key": "campaignId", "value": "1", "type": "string"},
+    {"key": "promotionId", "value": "1", "type": "string"}
+  ],
+  "item": [
+    {
+      "name": "1. Usage Tracking",
+      "item": [
+        {
+          "name": "1. Record Usage - Success",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"promotionId\": 1,\n  \"userId\": 101,\n  \"orderId\": \"ORD-2024-001\",\n  \"discountApplied\": 25.00,\n  \"orderAmount\": 150.00,\n  \"success\": true,\n  \"ipAddress\": \"192.168.1.100\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/analytics/usage", "host": ["{{baseUrl}}"], "path": ["analytics", "usage"]}
+          }
+        },
+        {
+          "name": "2. Record Usage - Different User",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"promotionId\": 1,\n  \"userId\": 102,\n  \"orderId\": \"ORD-2024-002\",\n  \"discountApplied\": 30.00,\n  \"orderAmount\": 200.00,\n  \"success\": true,\n  \"ipAddress\": \"192.168.1.101\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/analytics/usage", "host": ["{{baseUrl}}"], "path": ["analytics", "usage"]}
+          }
+        },
+        {
+          "name": "3. Record Usage - Failed",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"promotionId\": 1,\n  \"userId\": 103,\n  \"orderId\": \"ORD-2024-003\",\n  \"discountApplied\": 0,\n  \"orderAmount\": 50.00,\n  \"success\": false,\n  \"failureReason\": \"Promotion expired\",\n  \"ipAddress\": \"192.168.1.102\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/analytics/usage", "host": ["{{baseUrl}}"], "path": ["analytics", "usage"]}
+          }
+        },
+        {
+          "name": "4. Record Multiple Usages (Loop 5 times)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"promotionId\": 1,\n  \"userId\": {{$randomInt}},\n  \"orderId\": \"ORD-{{$timestamp}}\",\n  \"discountApplied\": 20.00,\n  \"orderAmount\": 120.00,\n  \"success\": true\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/analytics/usage", "host": ["{{baseUrl}}"], "path": ["analytics", "usage"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Campaign Analytics",
+      "item": [
+        {
+          "name": "1. Record Impression",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/analytics/campaigns/{{campaignId}}/impression", "host": ["{{baseUrl}}"], "path": ["analytics", "campaigns", "{{campaignId}}", "impression"]}
+          }
+        },
+        {
+          "name": "2. Record Click",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/analytics/campaigns/{{campaignId}}/click", "host": ["{{baseUrl}}"], "path": ["analytics", "campaigns", "{{campaignId}}", "click"]}
+          }
+        },
+        {
+          "name": "3. Get Campaign Performance - Today",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/analytics/campaigns/{{campaignId}}/performance", "host": ["{{baseUrl}}"], "path": ["analytics", "campaigns", "{{campaignId}}", "performance"]}
+          }
+        },
+        {
+          "name": "4. Get Campaign Performance - Specific Date",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/campaigns/{{campaignId}}/performance?date=2024-12-03",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "campaigns", "{{campaignId}}", "performance"],
+              "query": [{"key": "date", "value": "2024-12-03"}]
+            }
+          }
+        },
+        {
+          "name": "5. Get Campaign Performance - Date Range",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/campaigns/{{campaignId}}/performance/range?startDate=2024-12-01&endDate=2024-12-03",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "campaigns", "{{campaignId}}", "performance", "range"],
+              "query": [
+                {"key": "startDate", "value": "2024-12-01"},
+                {"key": "endDate", "value": "2024-12-03"}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Promotion Analytics",
+      "item": [
+        {
+          "name": "1. Get Promotion Metrics - Today",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/analytics/promotions/{{promotionId}}/metrics", "host": ["{{baseUrl}}"], "path": ["analytics", "promotions", "{{promotionId}}", "metrics"]}
+          }
+        },
+        {
+          "name": "2. Get Promotion Metrics - Specific Date",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/promotions/{{promotionId}}/metrics?date=2024-12-03",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "promotions", "{{promotionId}}", "metrics"],
+              "query": [{"key": "date", "value": "2024-12-03"}]
+            }
+          }
+        },
+        {
+          "name": "3. Get Promotion Metrics - Date Range",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/promotions/{{promotionId}}/metrics/range?startDate=2024-12-01&endDate=2024-12-03",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "promotions", "{{promotionId}}", "metrics", "range"],
+              "query": [
+                {"key": "startDate", "value": "2024-12-01"},
+                {"key": "endDate", "value": "2024-12-03"}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Dashboard & Reports",
+      "item": [
+        {
+          "name": "1. Get Dashboard Summary - Today",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/analytics/dashboard/summary", "host": ["{{baseUrl}}"], "path": ["analytics", "dashboard", "summary"]}
+          }
+        },
+        {
+          "name": "2. Get Dashboard Summary - Specific Date",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/dashboard/summary?date=2024-12-03",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "dashboard", "summary"],
+              "query": [{"key": "date", "value": "2024-12-03"}]
+            }
+          }
+        },
+        {
+          "name": "3. Get Top Campaigns - Today (Top 10)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/reports/top-campaigns?limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "reports", "top-campaigns"],
+              "query": [{"key": "limit", "value": "10"}]
+            }
+          }
+        },
+        {
+          "name": "4. Get Top Campaigns - Specific Date (Top 5)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/reports/top-campaigns?date=2024-12-03&limit=5",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "reports", "top-campaigns"],
+              "query": [
+                {"key": "date", "value": "2024-12-03"},
+                {"key": "limit", "value": "5"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "5. Get Top Promotions - Today (Top 10)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/reports/top-promotions?limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "reports", "top-promotions"],
+              "query": [{"key": "limit", "value": "10"}]
+            }
+          }
+        },
+        {
+          "name": "6. Get Top Promotions - Specific Date (Top 5)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/reports/top-promotions?date=2024-12-03&limit=5",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "reports", "top-promotions"],
+              "query": [
+                {"key": "date", "value": "2024-12-03"},
+                {"key": "limit", "value": "5"}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Aggregation",
+      "item": [
+        {
+          "name": "1. Trigger Daily Aggregation - Yesterday",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/analytics/aggregate/daily", "host": ["{{baseUrl}}"], "path": ["analytics", "aggregate", "daily"]}
+          }
+        },
+        {
+          "name": "2. Trigger Daily Aggregation - Specific Date",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/analytics/aggregate/daily?date=2024-12-03",
+              "host": ["{{baseUrl}}"],
+              "path": ["analytics", "aggregate", "daily"],
+              "query": [{"key": "date", "value": "2024-12-03"}]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Complete Analytics Workflow",
+      "item": [
+        {
+          "name": "Step 1 - Record 5 Successful Usages",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"promotionId\": 2,\n  \"userId\": 201,\n  \"orderId\": \"ORD-FLOW-001\",\n  \"discountApplied\": 50.00,\n  \"orderAmount\": 250.00,\n  \"success\": true\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/analytics/usage", "host": ["{{baseUrl}}"], "path": ["analytics", "usage"]}
+          }
+        },
+        {
+          "name": "Step 2 - Record Campaign Impressions (x10)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/analytics/campaigns/2/impression", "host": ["{{baseUrl}}"], "path": ["analytics", "campaigns", "2", "impression"]}
+          }
+        },
+        {
+          "name": "Step 3 - Record Campaign Clicks (x5)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/analytics/campaigns/2/click", "host": ["{{baseUrl}}"], "path": ["analytics", "campaigns", "2", "click"]}
+          }
+        },
+        {
+          "name": "Step 4 - Get Promotion Metrics (Real-time)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/analytics/promotions/2/metrics", "host": ["{{baseUrl}}"], "path": ["analytics", "promotions", "2", "metrics"]}
+          }
+        },
+        {
+          "name": "Step 5 - Get Campaign Performance",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/analytics/campaigns/2/performance", "host": ["{{baseUrl}}"], "path": ["analytics", "campaigns", "2", "performance"]}
+          }
+        },
+        {
+          "name": "Step 6 - Get Dashboard Summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/analytics/dashboard/summary", "host": ["{{baseUrl}}"], "path": ["analytics", "dashboard", "summary"]}
+          }
+        }
+      ]
+    }
+  ]
+}

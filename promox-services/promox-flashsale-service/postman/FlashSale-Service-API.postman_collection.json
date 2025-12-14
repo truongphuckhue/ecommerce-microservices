@@ -1,0 +1,371 @@
+{
+  "info": {
+    "name": "FlashSale Service API",
+    "description": "Complete API collection for PromoX FlashSale Service with Redis atomic operations",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:9003/api",
+      "type": "string"
+    },
+    {
+      "key": "flashSaleId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. CRUD Operations",
+      "item": [
+        {
+          "name": "1. Create Flash Sale - iPhone",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set('flashSaleId', jsonData.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campaignId\": 1,\n  \"productId\": 101,\n  \"productName\": \"iPhone 15 Pro Max 256GB\",\n  \"productSku\": \"IPHONE15PM256\",\n  \"originalPrice\": 1199.99,\n  \"flashPrice\": 899.99,\n  \"startTime\": \"2024-12-07T10:00:00\",\n  \"endTime\": \"2024-12-07T14:00:00\",\n  \"totalQuantity\": 100,\n  \"perUserLimit\": 2\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/flash-sales", "host": ["{{baseUrl}}"], "path": ["flash-sales"]}
+          }
+        },
+        {
+          "name": "2. Create Flash Sale - MacBook",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campaignId\": 1,\n  \"productId\": 102,\n  \"productName\": \"MacBook Pro 16\\\" M3 Max\",\n  \"productSku\": \"MBP16M3MAX\",\n  \"originalPrice\": 2499.99,\n  \"flashPrice\": 1999.99,\n  \"startTime\": \"2024-12-07T15:00:00\",\n  \"endTime\": \"2024-12-07T19:00:00\",\n  \"totalQuantity\": 50,\n  \"perUserLimit\": 1\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/flash-sales", "host": ["{{baseUrl}}"], "path": ["flash-sales"]}
+          }
+        },
+        {
+          "name": "3. Get Flash Sale by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/flash-sales/{{flashSaleId}}", "host": ["{{baseUrl}}"], "path": ["flash-sales", "{{flashSaleId}}"]}
+          }
+        },
+        {
+          "name": "4. Get All Flash Sales (Paginated)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/flash-sales?page=0&size=10&sortBy=startTime&sortDir=DESC",
+              "host": ["{{baseUrl}}"],
+              "path": ["flash-sales"],
+              "query": [
+                {"key": "page", "value": "0"},
+                {"key": "size", "value": "10"},
+                {"key": "sortBy", "value": "startTime"},
+                {"key": "sortDir", "value": "DESC"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "5. Update Flash Sale",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"flashPrice\": 849.99,\n  \"totalQuantity\": 150\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/flash-sales/{{flashSaleId}}", "host": ["{{baseUrl}}"], "path": ["flash-sales", "{{flashSaleId}}"]}
+          }
+        },
+        {
+          "name": "6. Delete Flash Sale",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/flash-sales/{{flashSaleId}}", "host": ["{{baseUrl}}"], "path": ["flash-sales", "{{flashSaleId}}"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Purchase Operations",
+      "item": [
+        {
+          "name": "1. Purchase Flash Sale - Success",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1,\n  \"quantity\": 1\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/flash-sales/{{flashSaleId}}/purchase", "host": ["{{baseUrl}}"], "path": ["flash-sales", "{{flashSaleId}}", "purchase"]}
+          }
+        },
+        {
+          "name": "2. Purchase Flash Sale - User 2",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 2,\n  \"quantity\": 2\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/flash-sales/{{flashSaleId}}/purchase", "host": ["{{baseUrl}}"], "path": ["flash-sales", "{{flashSaleId}}", "purchase"]}
+          }
+        },
+        {
+          "name": "3. Purchase Flash Sale - Exceed User Limit",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1,\n  \"quantity\": 3\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/flash-sales/{{flashSaleId}}/purchase", "host": ["{{baseUrl}}"], "path": ["flash-sales", "{{flashSaleId}}", "purchase"]}
+          }
+        },
+        {
+          "name": "4. Concurrent Purchase Test - User 3",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 3,\n  \"quantity\": 1\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/flash-sales/{{flashSaleId}}/purchase", "host": ["{{baseUrl}}"], "path": ["flash-sales", "{{flashSaleId}}", "purchase"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Status Management",
+      "item": [
+        {
+          "name": "1. Activate Flash Sale",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/flash-sales/{{flashSaleId}}/activate", "host": ["{{baseUrl}}"], "path": ["flash-sales", "{{flashSaleId}}", "activate"]}
+          }
+        },
+        {
+          "name": "2. End Flash Sale",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/flash-sales/{{flashSaleId}}/end", "host": ["{{baseUrl}}"], "path": ["flash-sales", "{{flashSaleId}}", "end"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Query Operations",
+      "item": [
+        {
+          "name": "1. Get Active Flash Sales",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/flash-sales/active", "host": ["{{baseUrl}}"], "path": ["flash-sales", "active"]}
+          }
+        },
+        {
+          "name": "2. Get Upcoming Flash Sales",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/flash-sales/upcoming?limit=5",
+              "host": ["{{baseUrl}}"],
+              "path": ["flash-sales", "upcoming"],
+              "query": [{"key": "limit", "value": "5"}]
+            }
+          }
+        },
+        {
+          "name": "3. Get Flash Sales by Campaign",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/flash-sales/campaign/1", "host": ["{{baseUrl}}"], "path": ["flash-sales", "campaign", "1"]}
+          }
+        },
+        {
+          "name": "4. Get Flash Sales by Status - ACTIVE",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/flash-sales/status/ACTIVE", "host": ["{{baseUrl}}"], "path": ["flash-sales", "status", "ACTIVE"]}
+          }
+        },
+        {
+          "name": "5. Search Flash Sales",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/flash-sales/search?keyword=iPhone&page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["flash-sales", "search"],
+              "query": [
+                {"key": "keyword", "value": "iPhone"},
+                {"key": "page", "value": "0"},
+                {"key": "size", "value": "10"}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Stock Management",
+      "item": [
+        {
+          "name": "1. Get Available Stock (Redis)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/flash-sales/{{flashSaleId}}/stock", "host": ["{{baseUrl}}"], "path": ["flash-sales", "{{flashSaleId}}", "stock"]}
+          }
+        },
+        {
+          "name": "2. Sync Stock to Database",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/flash-sales/{{flashSaleId}}/sync-stock", "host": ["{{baseUrl}}"], "path": ["flash-sales", "{{flashSaleId}}", "sync-stock"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Complete Flash Sale Lifecycle",
+      "item": [
+        {
+          "name": "Step 1 - Create Flash Sale",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set('lifecycleFlashSaleId', jsonData.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campaignId\": 1,\n  \"productId\": 103,\n  \"productName\": \"AirPods Pro 2\",\n  \"productSku\": \"AIRPODSPRO2\",\n  \"originalPrice\": 249.99,\n  \"flashPrice\": 179.99,\n  \"startTime\": \"2024-12-08T10:00:00\",\n  \"endTime\": \"2024-12-08T14:00:00\",\n  \"totalQuantity\": 200,\n  \"perUserLimit\": 3\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/flash-sales", "host": ["{{baseUrl}}"], "path": ["flash-sales"]}
+          }
+        },
+        {
+          "name": "Step 2 - Get Flash Sale Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/flash-sales/{{lifecycleFlashSaleId}}", "host": ["{{baseUrl}}"], "path": ["flash-sales", "{{lifecycleFlashSaleId}}"]}
+          }
+        },
+        {
+          "name": "Step 3 - Activate Flash Sale",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/flash-sales/{{lifecycleFlashSaleId}}/activate", "host": ["{{baseUrl}}"], "path": ["flash-sales", "{{lifecycleFlashSaleId}}", "activate"]}
+          }
+        },
+        {
+          "name": "Step 4 - Make Purchase",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1,\n  \"quantity\": 2\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/flash-sales/{{lifecycleFlashSaleId}}/purchase", "host": ["{{baseUrl}}"], "path": ["flash-sales", "{{lifecycleFlashSaleId}}", "purchase"]}
+          }
+        },
+        {
+          "name": "Step 5 - Check Stock",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/flash-sales/{{lifecycleFlashSaleId}}/stock", "host": ["{{baseUrl}}"], "path": ["flash-sales", "{{lifecycleFlashSaleId}}", "stock"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Load Testing Scenarios",
+      "item": [
+        {
+          "name": "Concurrent Purchase - User 10",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 10,\n  \"quantity\": 1\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/flash-sales/{{flashSaleId}}/purchase", "host": ["{{baseUrl}}"], "path": ["flash-sales", "{{flashSaleId}}", "purchase"]}
+          }
+        },
+        {
+          "name": "Concurrent Purchase - User 11",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 11,\n  \"quantity\": 1\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/flash-sales/{{flashSaleId}}/purchase", "host": ["{{baseUrl}}"], "path": ["flash-sales", "{{flashSaleId}}", "purchase"]}
+          }
+        },
+        {
+          "name": "Concurrent Purchase - User 12",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 12,\n  \"quantity\": 1\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/flash-sales/{{flashSaleId}}/purchase", "host": ["{{baseUrl}}"], "path": ["flash-sales", "{{flashSaleId}}", "purchase"]}
+          }
+        }
+      ]
+    }
+  ]
+}

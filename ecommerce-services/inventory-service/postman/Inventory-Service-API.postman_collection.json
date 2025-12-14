@@ -1,0 +1,95 @@
+{
+  "info": {
+    "name": "Inventory Service API",
+    "description": "Inventory management with concurrency control",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Inventory",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8002/api/inventory/{{productId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8002",
+          "path": ["api", "inventory", "{{productId}}"]
+        }
+      }
+    },
+    {
+      "name": "Reserve Stock",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"productId\": 1,\n  \"quantity\": 5\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8002/api/inventory/reserve",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8002",
+          "path": ["api", "inventory", "reserve"]
+        }
+      }
+    },
+    {
+      "name": "Release Stock",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"productId\": 1,\n  \"quantity\": 5\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8002/api/inventory/release",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8002",
+          "path": ["api", "inventory", "release"]
+        }
+      }
+    },
+    {
+      "name": "Update Stock",
+      "request": {
+        "method": "PUT",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"productId\": 1,\n  \"quantity\": 100\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8002/api/inventory/update",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8002",
+          "path": ["api", "inventory", "update"]
+        }
+      }
+    },
+    {
+      "name": "Check Availability",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8002/api/inventory/check/{{productId}}?quantity=10",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8002",
+          "path": ["api", "inventory", "check", "{{productId}}"],
+          "query": [{"key": "quantity", "value": "10"}]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {"key": "productId", "value": "1"}
+  ]
+}

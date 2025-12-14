@@ -1,0 +1,312 @@
+# Default values for ecommerce-platform
+# This is a YAML-formatted file.
+
+# Global settings
+global:
+  namespace: ecommerce-platform
+  imageRegistry: ghcr.io/your-org
+  imagePullPolicy: Always
+  environment: production
+
+# E-Commerce Services
+ecommerceServices:
+  productService:
+    enabled: true
+    name: product-service
+    port: 8001
+    replicas:
+      min: 2
+      max: 10
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "500m"
+      limits:
+        memory: "1Gi"
+        cpu: "1000m"
+  
+  inventoryService:
+    enabled: true
+    name: inventory-service
+    port: 8002
+    replicas:
+      min: 2
+      max: 10
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "500m"
+      limits:
+        memory: "1Gi"
+        cpu: "1000m"
+  
+  orderService:
+    enabled: true
+    name: order-service
+    port: 8003
+    replicas:
+      min: 3
+      max: 12
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "500m"
+      limits:
+        memory: "1Gi"
+        cpu: "1000m"
+  
+  paymentService:
+    enabled: true
+    name: payment-service
+    port: 8004
+    replicas:
+      min: 2
+      max: 8
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "500m"
+      limits:
+        memory: "1Gi"
+        cpu: "1000m"
+  
+  userService:
+    enabled: true
+    name: user-service
+    port: 8005
+    replicas:
+      min: 2
+      max: 8
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "500m"
+      limits:
+        memory: "1Gi"
+        cpu: "1000m"
+  
+  cartService:
+    enabled: true
+    name: cart-service
+    port: 8006
+    replicas:
+      min: 2
+      max: 8
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "500m"
+      limits:
+        memory: "1Gi"
+        cpu: "1000m"
+  
+  notificationService:
+    enabled: true
+    name: notification-service
+    port: 8007
+    replicas:
+      min: 2
+      max: 6
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "250m"
+      limits:
+        memory: "512Mi"
+        cpu: "500m"
+
+# PromoX Services
+promoxServices:
+  campaignService:
+    enabled: true
+    name: campaign-service
+    port: 9000
+    replicas:
+      min: 2
+      max: 8
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "500m"
+      limits:
+        memory: "1Gi"
+        cpu: "1000m"
+  
+  promotionService:
+    enabled: true
+    name: promotion-service
+    port: 9001
+    replicas:
+      min: 3
+      max: 12
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "500m"
+      limits:
+        memory: "1Gi"
+        cpu: "1000m"
+  
+  flashsaleService:
+    enabled: true
+    name: flashsale-service
+    port: 9002
+    replicas:
+      min: 2
+      max: 10
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "500m"
+      limits:
+        memory: "1Gi"
+        cpu: "1000m"
+  
+  couponService:
+    enabled: true
+    name: coupon-service
+    port: 9003
+    replicas:
+      min: 2
+      max: 10
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "500m"
+      limits:
+        memory: "1Gi"
+        cpu: "1000m"
+  
+  rewardService:
+    enabled: true
+    name: reward-service
+    port: 9005
+    replicas:
+      min: 2
+      max: 8
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "500m"
+      limits:
+        memory: "1Gi"
+        cpu: "1000m"
+  
+  analyticsService:
+    enabled: true
+    name: analytics-service
+    port: 9006
+    replicas:
+      min: 2
+      max: 8
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "500m"
+      limits:
+        memory: "1Gi"
+        cpu: "1000m"
+
+# Infrastructure Services
+infrastructure:
+  serviceDiscovery:
+    enabled: true
+    replicas: 2
+    port: 8761
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "250m"
+      limits:
+        memory: "1Gi"
+        cpu: "500m"
+  
+  apiGateway:
+    enabled: true
+    replicas:
+      min: 3
+      max: 15
+    port: 8080
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "500m"
+      limits:
+        memory: "1Gi"
+        cpu: "1000m"
+    ingress:
+      enabled: true
+      className: nginx
+      host: api.yourplatform.com
+      tls:
+        enabled: true
+        secretName: api-tls-secret
+
+# Databases
+databases:
+  postgres:
+    enabled: true
+    replicas: 1
+    port: 5432
+    storage: 10Gi
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "250m"
+      limits:
+        memory: "2Gi"
+        cpu: "1000m"
+  
+  redis:
+    enabled: true
+    replicas: 1
+    port: 6379
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "100m"
+      limits:
+        memory: "512Mi"
+        cpu: "500m"
+  
+  kafka:
+    enabled: true
+    replicas: 1
+    port: 9092
+    storage: 5Gi
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "500m"
+      limits:
+        memory: "2Gi"
+        cpu: "1000m"
+
+# Auto-scaling settings
+autoscaling:
+  enabled: true
+  cpuThreshold: 70
+  memoryThreshold: 80
+  scaleDown:
+    stabilizationWindowSeconds: 300
+  scaleUp:
+    stabilizationWindowSeconds: 0
+
+# Monitoring
+monitoring:
+  prometheus:
+    enabled: true
+    scrapeInterval: 15s
+  
+  zipkin:
+    enabled: true
+    endpoint: http://zipkin-service:9411
+
+# Security
+security:
+  rbac:
+    create: true
+  networkPolicy:
+    enabled: true
+  podSecurityPolicy:
+    enabled: false  # Deprecated in K8s 1.25+

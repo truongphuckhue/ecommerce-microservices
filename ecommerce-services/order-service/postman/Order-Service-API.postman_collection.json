@@ -1,0 +1,73 @@
+{
+  "info": {
+    "name": "Order Service API",
+    "description": "Order management with Saga pattern",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create Order",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": 1,\n  \"items\": [\n    {\n      \"productId\": 1,\n      \"quantity\": 2,\n      \"price\": 999.99\n    }\n  ],\n  \"shippingAddress\": {\n    \"street\": \"123 Main St\",\n    \"city\": \"San Francisco\",\n    \"state\": \"CA\",\n    \"zipCode\": \"94102\",\n    \"country\": \"USA\"\n  }\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8003/api/orders",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8003",
+          "path": ["api", "orders"]
+        }
+      }
+    },
+    {
+      "name": "Get Order by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8003/api/orders/{{orderId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8003",
+          "path": ["api", "orders", "{{orderId}}"]
+        }
+      }
+    },
+    {
+      "name": "Get User Orders",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8003/api/orders/user/{{userId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8003",
+          "path": ["api", "orders", "user", "{{userId}}"]
+        }
+      }
+    },
+    {
+      "name": "Cancel Order",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8003/api/orders/{{orderId}}/cancel",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8003",
+          "path": ["api", "orders", "{{orderId}}", "cancel"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {"key": "orderId", "value": "1"},
+    {"key": "userId", "value": "1"}
+  ]
+}

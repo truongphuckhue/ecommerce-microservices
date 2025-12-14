@@ -1,0 +1,91 @@
+{
+  "info": {
+    "name": "Cart Service API",
+    "description": "Shopping cart management endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Cart",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8006/api/cart/{{userId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8006",
+          "path": ["api", "cart", "{{userId}}"]
+        }
+      }
+    },
+    {
+      "name": "Add to Cart",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"productId\": 1,\n  \"productName\": \"iPhone 15 Pro\",\n  \"price\": 999.99,\n  \"quantity\": 1,\n  \"imageUrl\": \"https://example.com/iphone.jpg\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8006/api/cart/{{userId}}/items",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8006",
+          "path": ["api", "cart", "{{userId}}", "items"]
+        }
+      }
+    },
+    {
+      "name": "Update Cart Item",
+      "request": {
+        "method": "PUT",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"quantity\": 2\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8006/api/cart/{{userId}}/items/{{itemId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8006",
+          "path": ["api", "cart", "{{userId}}", "items", "{{itemId}}"]
+        }
+      }
+    },
+    {
+      "name": "Remove from Cart",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8006/api/cart/{{userId}}/items/{{itemId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8006",
+          "path": ["api", "cart", "{{userId}}", "items", "{{itemId}}"]
+        }
+      }
+    },
+    {
+      "name": "Clear Cart",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8006/api/cart/{{userId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8006",
+          "path": ["api", "cart", "{{userId}}"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {"key": "userId", "value": "1"},
+    {"key": "itemId", "value": "1"}
+  ]
+}

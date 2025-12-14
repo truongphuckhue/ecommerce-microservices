@@ -1,0 +1,290 @@
+groups:
+  # ============================================
+  # SERVICE HEALTH ALERTS
+  # ============================================
+  - name: service_health
+    interval: 30s
+    rules:
+      # Service Down Alert
+      - alert: ServiceDown
+        expr: up{job=~".+-service"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          category: availability
+        annotations:
+          summary: "Service {{ $labels.service }} is down"
+          description: "{{ $labels.service }} has been down for more than 1 minute"
+          dashboard: "http://grafana:3000/d/system-health"
+
+      # High Error Rate
+      - alert: HighErrorRate
+        expr: |
+          (
+            rate(http_server_requests_seconds_count{status=~"5.."}[5m])
+            /
+            rate(http_server_requests_seconds_count[5m])
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          category: errors
+        annotations:
+          summary: "High error rate on {{ $labels.service }}"
+          description: "Error rate is {{ $value | humanizePercentage }} (threshold: 5%)"
+
+      # Critical Error Rate
+      - alert: CriticalErrorRate
+        expr: |
+          (
+            rate(http_server_requests_seconds_count{status=~"5.."}[5m])
+            /
+            rate(http_server_requests_seconds_count[5m])
+          ) > 0.10
+        for: 2m
+        labels:
+          severity: critical
+          category: errors
+        annotations:
+          summary: "CRITICAL: Very high error rate on {{ $labels.service }}"
+          description: "Error rate is {{ $value | humanizePercentage }} (threshold: 10%)"
+
+  # ============================================
+  # PERFORMANCE ALERTS
+  # ============================================
+  - name: performance
+    interval: 30s
+    rules:
+      # Slow Response Time
+      - alert: SlowResponseTime
+        expr: |
+          histogram_quantile(0.95,
+            rate(http_server_requests_seconds_bucket[5m])
+          ) > 1
+        for: 5m
+        labels:
+          severity: warning
+          category: performance
+        annotations:
+          summary: "Slow response time on {{ $labels.service }}"
+          description: "P95 response time is {{ $value }}s (threshold: 1s)"
+
+      # Very Slow Response Time
+      - alert: VerySlowResponseTime
+        expr: |
+          histogram_quantile(0.95,
+            rate(http_server_requests_seconds_bucket[5m])
+          ) > 3
+        for: 2m
+        labels:
+          severity: critical
+          category: performance
+        annotations:
+          summary: "CRITICAL: Very slow response time on {{ $labels.service }}"
+          description: "P95 response time is {{ $value }}s (threshold: 3s)"
+
+      # High Request Rate
+      - alert: HighRequestRate
+        expr: rate(http_server_requests_seconds_count[1m]) > 1000
+        for: 5m
+        labels:
+          severity: info
+          category: traffic
+        annotations:
+          summary: "High request rate on {{ $labels.service }}"
+          description: "Request rate is {{ $value }} req/s (threshold: 1000 req/s)"
+
+  # ============================================
+  # RESOURCE ALERTS
+  # ============================================
+  - name: resources
+    interval: 30s
+    rules:
+      # High CPU Usage
+      - alert: HighCPUUsage
+        expr: |
+          rate(process_cpu_seconds_total[5m]) > 0.8
+        for: 10m
+        labels:
+          severity: warning
+          category: resources
+        annotations:
+          summary: "High CPU usage on {{ $labels.service }}"
+          description: "CPU usage is {{ $value | humanizePercentage }} (threshold: 80%)"
+
+      # High Memory Usage
+      - alert: HighMemoryUsage
+        expr: |
+          (
+            jvm_memory_used_bytes{area="heap"}
+            /
+            jvm_memory_max_bytes{area="heap"}
+          ) > 0.85
+        for: 10m
+        labels:
+          severity: warning
+          category: resources
+        annotations:
+          summary: "High memory usage on {{ $labels.service }}"
+          description: "Heap usage is {{ $value | humanizePercentage }} (threshold: 85%)"
+
+      # Critical Memory Usage
+      - alert: CriticalMemoryUsage
+        expr: |
+          (
+            jvm_memory_used_bytes{area="heap"}
+            /
+            jvm_memory_max_bytes{area="heap"}
+          ) > 0.95
+        for: 5m
+        labels:
+          severity: critical
+          category: resources
+        annotations:
+          summary: "CRITICAL: Very high memory usage on {{ $labels.service }}"
+          description: "Heap usage is {{ $value | humanizePercentage }} (threshold: 95%)"
+
+      # High GC Time
+      - alert: HighGCTime
+        expr: |
+          rate(jvm_gc_pause_seconds_sum[5m])
+          /
+          rate(jvm_gc_pause_seconds_count[5m])
+          > 0.5
+        for: 5m
+        labels:
+          severity: warning
+          category: resources
+        annotations:
+          summary: "High GC time on {{ $labels.service }}"
+          description: "Average GC pause is {{ $value }}s (threshold: 0.5s)"
+
+  # ============================================
+  # BUSINESS METRICS ALERTS
+  # ============================================
+  - name: business_metrics
+    interval: 1m
+    rules:
+      # Order Creation Stopped
+      - alert: NoOrdersCreated
+        expr: |
+          rate(orders_created_total[10m]) == 0
+        for: 10m
+        labels:
+          severity: critical
+          category: business
+        annotations:
+          summary: "No orders created in last 10 minutes"
+          description: "Order creation has stopped. Check Order Service immediately."
+
+      # High Order Failure Rate
+      - alert: HighOrderFailureRate
+        expr: |
+          (
+            rate(orders_failed_total[5m])
+            /
+            rate(orders_created_total[5m])
+          ) > 0.10
+        for: 5m
+        labels:
+          severity: warning
+          category: business
+        annotations:
+          summary: "High order failure rate"
+          description: "Order failure rate is {{ $value | humanizePercentage }} (threshold: 10%)"
+
+      # Promotion Service Issues
+      - alert: HighPromotionFailureRate
+        expr: |
+          (
+            rate(promotion_validation_failed_total[5m])
+            /
+            rate(promotion_validation_total[5m])
+          ) > 0.20
+        for: 5m
+        labels:
+          severity: warning
+          category: business
+        annotations:
+          summary: "High promotion validation failure rate"
+          description: "Promotion failures: {{ $value | humanizePercentage }} (threshold: 20%)"
+
+  # ============================================
+  # DATABASE ALERTS
+  # ============================================
+  - name: database
+    interval: 30s
+    rules:
+      # High Connection Pool Usage
+      - alert: HighDatabaseConnections
+        expr: |
+          (
+            hikaricp_connections_active
+            /
+            hikaricp_connections_max
+          ) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          category: database
+        annotations:
+          summary: "High database connection pool usage on {{ $labels.service }}"
+          description: "Connection pool usage is {{ $value | humanizePercentage }} (threshold: 80%)"
+
+      # Slow Database Queries
+      - alert: SlowDatabaseQueries
+        expr: |
+          histogram_quantile(0.95,
+            rate(hikaricp_connections_acquire_seconds_bucket[5m])
+          ) > 1
+        for: 5m
+        labels:
+          severity: warning
+          category: database
+        annotations:
+          summary: "Slow database connection acquisition on {{ $labels.service }}"
+          description: "P95 acquisition time is {{ $value }}s (threshold: 1s)"
+
+  # ============================================
+  # CACHE ALERTS (Redis)
+  # ============================================
+  - name: cache
+    interval: 30s
+    rules:
+      # Low Cache Hit Rate
+      - alert: LowCacheHitRate
+        expr: |
+          (
+            rate(cache_gets_total{result="hit"}[5m])
+            /
+            rate(cache_gets_total[5m])
+          ) < 0.5
+        for: 10m
+        labels:
+          severity: warning
+          category: cache
+        annotations:
+          summary: "Low cache hit rate on {{ $labels.service }}"
+          description: "Cache hit rate is {{ $value | humanizePercentage }} (threshold: 50%)"
+
+  # ============================================
+  # INTEGRATION ALERTS
+  # ============================================
+  - name: integration
+    interval: 1m
+    rules:
+      # Feign Client Errors
+      - alert: HighFeignClientErrors
+        expr: |
+          (
+            rate(feign_client_requests_total{status=~"5.."}[5m])
+            /
+            rate(feign_client_requests_total[5m])
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+          category: integration
+        annotations:
+          summary: "High Feign client error rate from {{ $labels.service }}"
+          description: "Feign client error rate is {{ $value | humanizePercentage }} (threshold: 5%)"

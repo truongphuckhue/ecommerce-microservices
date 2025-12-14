@@ -1,0 +1,348 @@
+{
+  "info": {
+    "name": "Reward Service API",
+    "description": "Complete API collection for PromoX Reward Service with points, tiers, and achievements",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {"key": "baseUrl", "value": "http://localhost:9005/api", "type": "string"},
+    {"key": "userId", "value": "1", "type": "string"},
+    {"key": "transactionId", "value": "", "type": "string"}
+  ],
+  "item": [
+    {
+      "name": "1. Account Management",
+      "item": [
+        {
+          "name": "1. Get or Create Account - User 1",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/rewards/account/1", "host": ["{{baseUrl}}"], "path": ["rewards", "account", "1"]}
+          }
+        },
+        {
+          "name": "2. Get or Create Account - User 2",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/rewards/account/2", "host": ["{{baseUrl}}"], "path": ["rewards", "account", "2"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Earn Points",
+      "item": [
+        {
+          "name": "1. Earn Points - Purchase Reward",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1,\n  \"points\": 100,\n  \"transactionType\": \"PURCHASE_REWARD\",\n  \"description\": \"Purchase reward for order ORD-123\",\n  \"referenceType\": \"ORDER\",\n  \"referenceId\": \"ORD-123\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/rewards/earn", "host": ["{{baseUrl}}"], "path": ["rewards", "earn"]}
+          }
+        },
+        {
+          "name": "2. Earn Points - Signup Bonus",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1,\n  \"points\": 500,\n  \"transactionType\": \"SIGNUP_BONUS\",\n  \"description\": \"Welcome bonus for new user\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/rewards/earn", "host": ["{{baseUrl}}"], "path": ["rewards", "earn"]}
+          }
+        },
+        {
+          "name": "3. Earn Points - Referral Bonus",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1,\n  \"points\": 200,\n  \"transactionType\": \"REFERRAL_BONUS\",\n  \"description\": \"Referral bonus for inviting friend\",\n  \"referenceType\": \"USER\",\n  \"referenceId\": \"2\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/rewards/earn", "host": ["{{baseUrl}}"], "path": ["rewards", "earn"]}
+          }
+        },
+        {
+          "name": "4. Earn Points - Birthday Bonus",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1,\n  \"points\": 300,\n  \"transactionType\": \"BIRTHDAY_BONUS\",\n  \"description\": \"Happy Birthday! 🎂\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/rewards/earn", "host": ["{{baseUrl}}"], "path": ["rewards", "earn"]}
+          }
+        },
+        {
+          "name": "5. Earn Points - Pending (30 days)",
+          "event": [{"listen": "test", "script": {"exec": ["var jsonData = pm.response.json();", "// Transaction ID would be in response if we returned it"]}}],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1,\n  \"points\": 150,\n  \"transactionType\": \"PURCHASE_REWARD\",\n  \"description\": \"Pending points from order\",\n  \"expiryDays\": 30\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/rewards/earn", "host": ["{{baseUrl}}"], "path": ["rewards", "earn"]}
+          }
+        },
+        {
+          "name": "6. Earn Large Points - Tier Upgrade",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1,\n  \"points\": 2000,\n  \"transactionType\": \"PURCHASE_REWARD\",\n  \"description\": \"Large purchase - trigger tier upgrade\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/rewards/earn", "host": ["{{baseUrl}}"], "path": ["rewards", "earn"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Redeem Points",
+      "item": [
+        {
+          "name": "1. Redeem Points - Success",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1,\n  \"points\": 100,\n  \"description\": \"Redeemed for $1 voucher\",\n  \"referenceType\": \"VOUCHER\",\n  \"referenceId\": \"VOUCH-001\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/rewards/redeem", "host": ["{{baseUrl}}"], "path": ["rewards", "redeem"]}
+          }
+        },
+        {
+          "name": "2. Redeem Points - Insufficient Balance",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1,\n  \"points\": 99999,\n  \"description\": \"Try to redeem too many points\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/rewards/redeem", "host": ["{{baseUrl}}"], "path": ["rewards", "redeem"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Transaction Management",
+      "item": [
+        {
+          "name": "1. Get Transaction History - User 1",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/rewards/transactions/1?page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["rewards", "transactions", "1"],
+              "query": [{"key": "page", "value": "0"}, {"key": "size", "value": "10"}]
+            }
+          }
+        },
+        {
+          "name": "2. Confirm Pending Transaction",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/rewards/transactions/{{transactionId}}/confirm", "host": ["{{baseUrl}}"], "path": ["rewards", "transactions", "{{transactionId}}", "confirm"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Achievements",
+      "item": [
+        {
+          "name": "1. Get All Achievements",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/rewards/achievements", "host": ["{{baseUrl}}"], "path": ["rewards", "achievements"]}
+          }
+        },
+        {
+          "name": "2. Get User Achievements",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/rewards/achievements/1", "host": ["{{baseUrl}}"], "path": ["rewards", "achievements", "1"]}
+          }
+        },
+        {
+          "name": "3. Check and Unlock Achievements",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/rewards/achievements/1/check", "host": ["{{baseUrl}}"], "path": ["rewards", "achievements", "1", "check"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Tier Management",
+      "item": [
+        {
+          "name": "1. Update Tier Level",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/rewards/tier/1/update", "host": ["{{baseUrl}}"], "path": ["rewards", "tier", "1", "update"]}
+          }
+        },
+        {
+          "name": "2. Check Account After Tier Update",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/rewards/account/1", "host": ["{{baseUrl}}"], "path": ["rewards", "account", "1"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Complete Reward Journey",
+      "item": [
+        {
+          "name": "Step 1 - Create Account",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/rewards/account/3", "host": ["{{baseUrl}}"], "path": ["rewards", "account", "3"]}
+          }
+        },
+        {
+          "name": "Step 2 - Signup Bonus",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 3,\n  \"points\": 500,\n  \"transactionType\": \"SIGNUP_BONUS\",\n  \"description\": \"Welcome bonus\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/rewards/earn", "host": ["{{baseUrl}}"], "path": ["rewards", "earn"]}
+          }
+        },
+        {
+          "name": "Step 3 - First Purchase (200 pts)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 3,\n  \"points\": 200,\n  \"transactionType\": \"PURCHASE_REWARD\",\n  \"description\": \"First purchase\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/rewards/earn", "host": ["{{baseUrl}}"], "path": ["rewards", "earn"]}
+          }
+        },
+        {
+          "name": "Step 4 - Reach Silver (400 more pts)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 3,\n  \"points\": 400,\n  \"transactionType\": \"PURCHASE_REWARD\",\n  \"description\": \"Purchase to reach Silver tier\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/rewards/earn", "host": ["{{baseUrl}}"], "path": ["rewards", "earn"]}
+          }
+        },
+        {
+          "name": "Step 5 - Check Account (Should be Silver + Bonus)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/rewards/account/3", "host": ["{{baseUrl}}"], "path": ["rewards", "account", "3"]}
+          }
+        },
+        {
+          "name": "Step 6 - Redeem 200 Points",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 3,\n  \"points\": 200,\n  \"description\": \"Redeem for $2 voucher\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/rewards/redeem", "host": ["{{baseUrl}}"], "path": ["rewards", "redeem"]}
+          }
+        },
+        {
+          "name": "Step 7 - Check Transaction History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/rewards/transactions/3?page=0&size=20", "host": ["{{baseUrl}}"], "path": ["rewards", "transactions", "3"], "query": [{"key": "page", "value": "0"}, {"key": "size", "value": "20"}]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Tier Progression Test",
+      "item": [
+        {
+          "name": "1. User 4 - Start (BRONZE)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/rewards/account/4", "host": ["{{baseUrl}}"], "path": ["rewards", "account", "4"]}
+          }
+        },
+        {
+          "name": "2. Earn 1200 pts - Reach SILVER",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 4,\n  \"points\": 1200,\n  \"transactionType\": \"PURCHASE_REWARD\",\n  \"description\": \"Large purchase\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/rewards/earn", "host": ["{{baseUrl}}"], "path": ["rewards", "earn"]}
+          }
+        },
+        {
+          "name": "3. Check - Should be SILVER + 100 bonus",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/rewards/account/4", "host": ["{{baseUrl}}"], "path": ["rewards", "account", "4"]}
+          }
+        },
+        {
+          "name": "4. Earn 2000 pts - Reach GOLD",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 4,\n  \"points\": 2000,\n  \"transactionType\": \"PURCHASE_REWARD\",\n  \"description\": \"Another large purchase\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/rewards/earn", "host": ["{{baseUrl}}"], "path": ["rewards", "earn"]}
+          }
+        },
+        {
+          "name": "5. Check - Should be GOLD + 300 bonus",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/rewards/account/4", "host": ["{{baseUrl}}"], "path": ["rewards", "account", "4"]}
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "info": {
+    "name": "User Service API (Auth)",
+    "description": "User authentication and authorization",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Register",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"john.doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"SecurePass123!\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8005/api/auth/register",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8005",
+          "path": ["api", "auth", "register"]
+        }
+      }
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"john.doe\",\n  \"password\": \"SecurePass123!\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8005/api/auth/login",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8005",
+          "path": ["api", "auth", "login"]
+        }
+      }
+    },
+    {
+      "name": "Refresh Token",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8005/api/auth/refresh",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8005",
+          "path": ["api", "auth", "refresh"]
+        }
+      }
+    },
+    {
+      "name": "Logout",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+        ],
+        "url": {
+          "raw": "http://localhost:8005/api/auth/logout",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8005",
+          "path": ["api", "auth", "logout"]
+        }
+      }
+    },
+    {
+      "name": "Get Current User",
+      "request": {
+        "method": "GET",
+        "header": [
+          {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+        ],
+        "url": {
+          "raw": "http://localhost:8005/api/auth/me",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8005",
+          "path": ["api", "auth", "me"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {"key": "accessToken", "value": ""},
+    {"key": "refreshToken", "value": ""}
+  ]
+}

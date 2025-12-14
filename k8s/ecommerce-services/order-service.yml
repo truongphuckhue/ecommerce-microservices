@@ -1,0 +1,294 @@
+# ============================================
+# ORDER SERVICE - Deployment
+# ============================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+  namespace: ecommerce-platform
+  labels:
+    app: order-service
+    tier: ecommerce
+    version: v1
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0  # Zero downtime
+  selector:
+    matchLabels:
+      app: order-service
+  template:
+    metadata:
+      labels:
+        app: order-service
+        tier: ecommerce
+        version: v1
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8003"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      # Service Account for RBAC
+      serviceAccountName: ecommerce-service-account
+      
+      # Security Context
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      
+      # Init Container - Wait for dependencies
+      initContainers:
+        - name: wait-for-postgres
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z postgres-service 5432; do
+                echo "Waiting for PostgreSQL..."
+                sleep 2
+              done
+              echo "PostgreSQL is ready!"
+        
+        - name: wait-for-eureka
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              until nc -z service-discovery 8761; do
+                echo "Waiting for Eureka..."
+                sleep 2
+              done
+              echo "Eureka is ready!"
+      
+      # Main Container
+      containers:
+        - name: order-service
+          image: ghcr.io/your-org/order-service:latest
+          imagePullPolicy: Always
+          
+          ports:
+            - name: http
+              containerPort: 8003
+              protocol: TCP
+          
+          # Environment Variables
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "production"
+            
+            - name: SERVER_PORT
+              value: "8003"
+            
+            # Database
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://$(POSTGRES_HOST):$(POSTGRES_PORT)/$(POSTGRES_DB)"
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: database-secrets
+                  key: POSTGRES_USER
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: database-secrets
+                  key: POSTGRES_PASSWORD
+            
+            # Redis
+            - name: SPRING_REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: database-config
+                  key: REDIS_HOST
+            
+            # Eureka
+            - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+              valueFrom:
+                configMapKeyRef:
+                  name: service-discovery-config
+                  key: EUREKA_SERVER_URL
+            
+            # Zipkin
+            - name: MANAGEMENT_ZIPKIN_TRACING_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: monitoring-config
+                  key: ZIPKIN_URL
+            
+            # JVM Options
+            - name: JAVA_OPTS
+              valueFrom:
+                configMapKeyRef:
+                  name: jvm-config
+                  key: JAVA_OPTS
+          
+          envFrom:
+            - configMapRef:
+                name: database-config
+            - configMapRef:
+                name: monitoring-config
+          
+          # Resource Limits
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          
+          # Liveness Probe - Is the app running?
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8003
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+            successThreshold: 1
+          
+          # Readiness Probe - Can it accept traffic?
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8003
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+            successThreshold: 1
+          
+          # Startup Probe - Initial startup
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8003
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 30  # 5 minutes max
+            successThreshold: 1
+          
+          # Volume Mounts
+          volumeMounts:
+            - name: logs
+              mountPath: /app/logs
+      
+      # Volumes
+      volumes:
+        - name: logs
+          emptyDir: {}
+      
+      # Pod Affinity - Spread across nodes
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - order-service
+                topologyKey: kubernetes.io/hostname
+
+---
+# ============================================
+# ORDER SERVICE - Service
+# ============================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+  namespace: ecommerce-platform
+  labels:
+    app: order-service
+    tier: ecommerce
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8003"
+spec:
+  type: ClusterIP
+  selector:
+    app: order-service
+  ports:
+    - name: http
+      port: 8003
+      targetPort: 8003
+      protocol: TCP
+  sessionAffinity: None
+
+---
+# ============================================
+# ORDER SERVICE - HorizontalPodAutoscaler
+# ============================================
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: order-service-hpa
+  namespace: ecommerce-platform
+  labels:
+    app: order-service
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: order-service
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    # CPU-based scaling
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    
+    # Memory-based scaling
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+  
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300  # 5 minutes
+      policies:
+        - type: Percent
+          value: 50  # Scale down max 50% at a time
+          periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 0  # Scale up immediately
+      policies:
+        - type: Percent
+          value: 100  # Scale up max 100% at a time
+          periodSeconds: 15
+        - type: Pods
+          value: 2  # Or add 2 pods at a time
+          periodSeconds: 15
+      selectPolicy: Max  # Use the policy that scales up most
+
+---
+# ============================================
+# ORDER SERVICE - PodDisruptionBudget
+# ============================================
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: order-service-pdb
+  namespace: ecommerce-platform
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: order-service

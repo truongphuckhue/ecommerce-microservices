@@ -1,0 +1,171 @@
+{
+  "dashboard": {
+    "title": "Business Metrics - KPIs",
+    "tags": ["business", "kpi", "orders", "revenue"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Orders Per Hour",
+        "type": "stat",
+        "targets": [{
+          "expr": "business:orders:per_hour",
+          "legendFormat": "Orders/hour"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "color": {"mode": "thresholds"},
+            "thresholds": {
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 10, "color": "yellow"},
+                {"value": 50, "color": "green"}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Average Order Value ($)",
+        "type": "stat",
+        "targets": [{
+          "expr": "business:order_value:average",
+          "legendFormat": "Avg Order"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "decimals": 2
+          }
+        },
+        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Total Discounts/Hour ($)",
+        "type": "stat",
+        "targets": [{
+          "expr": "business:discount:per_hour",
+          "legendFormat": "Discounts/hour"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD"
+          }
+        },
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0}
+      },
+      {
+        "id": 4,
+        "title": "Promotion Success Rate (%)",
+        "type": "gauge",
+        "targets": [{
+          "expr": "business:promotion:success_rate",
+          "legendFormat": "Success Rate"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 80, "color": "yellow"},
+                {"value": 95, "color": "green"}
+              ]
+            }
+          }
+        },
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0}
+      },
+      {
+        "id": 5,
+        "title": "Orders Created Over Time",
+        "type": "graph",
+        "targets": [{
+          "expr": "business:orders:per_minute",
+          "legendFormat": "Orders/min"
+        }],
+        "yaxes": [{"format": "short", "label": "Orders/min"}],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4}
+      },
+      {
+        "id": 6,
+        "title": "Order Value Distribution",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum(rate(order_amount_total[5m]))",
+            "legendFormat": "Total Revenue"
+          },
+          {
+            "expr": "business:order_value:average",
+            "legendFormat": "Average Order"
+          }
+        ],
+        "yaxes": [{"format": "currencyUSD"}],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4}
+      },
+      {
+        "id": 7,
+        "title": "Discount Trends",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "rate(discount_amount_total{type=\"promotion\"}[5m]) * 3600",
+            "legendFormat": "Promotions"
+          },
+          {
+            "expr": "rate(discount_amount_total{type=\"coupon\"}[5m]) * 3600",
+            "legendFormat": "Coupons"
+          },
+          {
+            "expr": "rate(discount_amount_total{type=\"flashsale\"}[5m]) * 3600",
+            "legendFormat": "Flash Sales"
+          }
+        ],
+        "yaxes": [{"format": "currencyUSD", "label": "$/hour"}],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12}
+      },
+      {
+        "id": 8,
+        "title": "Top 10 Products Sold",
+        "type": "table",
+        "targets": [{
+          "expr": "topk(10, sum by (product_id, product_name) (rate(product_sold_total[1h])))",
+          "format": "table",
+          "instant": true
+        }],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12}
+      },
+      {
+        "id": 9,
+        "title": "Coupon Redemption Rate",
+        "type": "graph",
+        "targets": [{
+          "expr": "business:coupon:redemption_rate",
+          "legendFormat": "Redemption Rate"
+        }],
+        "yaxes": [{"format": "percent", "max": 100}],
+        "gridPos": {"h": 6, "w": 12, "x": 0, "y": 20}
+      },
+      {
+        "id": 10,
+        "title": "Reward Points Earned",
+        "type": "graph",
+        "targets": [{
+          "expr": "rate(reward_points_earned_total[5m]) * 60",
+          "legendFormat": "Points/min"
+        }],
+        "yaxes": [{"format": "short", "label": "Points/min"}],
+        "gridPos": {"h": 6, "w": 12, "x": 12, "y": 20}
+      }
+    ],
+    "refresh": "30s",
+    "time": {"from": "now-6h", "to": "now"}
+  }
+}

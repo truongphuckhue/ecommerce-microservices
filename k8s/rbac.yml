@@ -1,0 +1,80 @@
+# ============================================
+# SERVICE ACCOUNT
+# ============================================
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ecommerce-service-account
+  namespace: ecommerce-platform
+  labels:
+    app: ecommerce-platform
+
+---
+# ============================================
+# ROLE - Pod Management
+# ============================================
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ecommerce-pod-reader
+  namespace: ecommerce-platform
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "services", "endpoints"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list"]
+
+---
+# ============================================
+# ROLE BINDING
+# ============================================
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ecommerce-pod-reader-binding
+  namespace: ecommerce-platform
+subjects:
+  - kind: ServiceAccount
+    name: ecommerce-service-account
+    namespace: ecommerce-platform
+roleRef:
+  kind: Role
+  name: ecommerce-pod-reader
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# ============================================
+# NETWORK POLICY - Pod Communication
+# ============================================
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-same-namespace
+  namespace: ecommerce-platform
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector: {}
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-from-ingress
+  namespace: ecommerce-platform
+spec:
+  podSelector:
+    matchLabels:
+      app: api-gateway
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx

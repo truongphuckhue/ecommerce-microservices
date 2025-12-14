@@ -1,0 +1,44 @@
+{
+  "info": {
+    "name": "Notification Service API",
+    "description": "Email and SMS notification management",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get User Notifications",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8007/api/notifications/user/{{userId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8007",
+          "path": ["api", "notifications", "user", "{{userId}}"]
+        }
+      }
+    },
+    {
+      "name": "Send Notification",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": 1,\n  \"type\": \"EMAIL\",\n  \"subject\": \"Order Confirmation\",\n  \"message\": \"Your order #12345 has been confirmed\",\n  \"recipient\": \"user@example.com\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8007/api/notifications/send",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8007",
+          "path": ["api", "notifications", "send"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {"key": "userId", "value": "1"}
+  ]
+}

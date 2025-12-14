@@ -1,0 +1,107 @@
+groups:
+  # ============================================
+  # AGGREGATED METRICS - Precompute expensive queries
+  # ============================================
+  - name: aggregated_metrics
+    interval: 30s
+    rules:
+      # Total requests per service
+      - record: service:http_requests:rate5m
+        expr: rate(http_server_requests_seconds_count[5m])
+
+      # Error rate per service
+      - record: service:http_errors:rate5m
+        expr: rate(http_server_requests_seconds_count{status=~"5.."}[5m])
+
+      # Error percentage per service
+      - record: service:http_errors:percentage5m
+        expr: |
+          (
+            rate(http_server_requests_seconds_count{status=~"5.."}[5m])
+            /
+            rate(http_server_requests_seconds_count[5m])
+          ) * 100
+
+      # P95 response time per service
+      - record: service:http_request_duration:p95
+        expr: |
+          histogram_quantile(0.95,
+            rate(http_server_requests_seconds_bucket[5m])
+          )
+
+      # P99 response time per service
+      - record: service:http_request_duration:p99
+        expr: |
+          histogram_quantile(0.99,
+            rate(http_server_requests_seconds_bucket[5m])
+          )
+
+  # ============================================
+  # BUSINESS METRICS AGGREGATIONS
+  # ============================================
+  - name: business_aggregations
+    interval: 1m
+    rules:
+      # Orders per minute
+      - record: business:orders:per_minute
+        expr: rate(orders_created_total[1m]) * 60
+
+      # Orders per hour
+      - record: business:orders:per_hour
+        expr: rate(orders_created_total[1h]) * 3600
+
+      # Average order value
+      - record: business:order_value:average
+        expr: |
+          sum(rate(order_amount_total[5m]))
+          /
+          sum(rate(orders_created_total[5m]))
+
+      # Total discount per hour
+      - record: business:discount:per_hour
+        expr: rate(discount_amount_total[1h]) * 3600
+
+      # Promotion success rate
+      - record: business:promotion:success_rate
+        expr: |
+          (
+            rate(promotion_validation_success_total[5m])
+            /
+            rate(promotion_validation_total[5m])
+          ) * 100
+
+      # Coupon redemption rate
+      - record: business:coupon:redemption_rate
+        expr: |
+          (
+            rate(coupon_redemption_success_total[5m])
+            /
+            rate(coupon_redemption_total[5m])
+          ) * 100
+
+  # ============================================
+  # RESOURCE AGGREGATIONS
+  # ============================================
+  - name: resource_aggregations
+    interval: 30s
+    rules:
+      # Average CPU usage across all services
+      - record: platform:cpu:average
+        expr: avg(rate(process_cpu_seconds_total[5m]))
+
+      # Average memory usage across all services
+      - record: platform:memory:average
+        expr: |
+          avg(
+            jvm_memory_used_bytes{area="heap"}
+            /
+            jvm_memory_max_bytes{area="heap"}
+          ) * 100
+
+      # Total JVM threads
+      - record: platform:threads:total
+        expr: sum(jvm_threads_live_threads)
+
+      # Total database connections
+      - record: platform:database:connections_total
+        expr: sum(hikaricp_connections_active)

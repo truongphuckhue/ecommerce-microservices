@@ -1,0 +1,186 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'ecommerce-platform'
+    environment: 'production'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - 'alertmanager:9093'
+
+# Load rules once and periodically evaluate them
+rule_files:
+  - "alerts.yml"
+  - "recording-rules.yml"
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Service Discovery (Eureka)
+  - job_name: 'service-discovery'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['service-discovery:8761']
+        labels:
+          service: 'service-discovery'
+          tier: 'infrastructure'
+
+  # API Gateway
+  - job_name: 'api-gateway'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['api-gateway:8080']
+        labels:
+          service: 'api-gateway'
+          tier: 'infrastructure'
+
+  # E-Commerce Services
+  - job_name: 'product-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['product-service:8001']
+        labels:
+          service: 'product-service'
+          tier: 'ecommerce'
+          domain: 'catalog'
+
+  - job_name: 'inventory-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['inventory-service:8002']
+        labels:
+          service: 'inventory-service'
+          tier: 'ecommerce'
+          domain: 'inventory'
+
+  - job_name: 'order-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['order-service:8003']
+        labels:
+          service: 'order-service'
+          tier: 'ecommerce'
+          domain: 'orders'
+
+  - job_name: 'payment-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['payment-service:8004']
+        labels:
+          service: 'payment-service'
+          tier: 'ecommerce'
+          domain: 'payments'
+
+  - job_name: 'user-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['user-service:8005']
+        labels:
+          service: 'user-service'
+          tier: 'ecommerce'
+          domain: 'users'
+
+  - job_name: 'cart-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['cart-service:8006']
+        labels:
+          service: 'cart-service'
+          tier: 'ecommerce'
+          domain: 'cart'
+
+  - job_name: 'notification-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['notification-service:8007']
+        labels:
+          service: 'notification-service'
+          tier: 'ecommerce'
+          domain: 'notifications'
+
+  # PromoX Services
+  - job_name: 'campaign-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['campaign-service:9000']
+        labels:
+          service: 'campaign-service'
+          tier: 'promox'
+          domain: 'promotions'
+
+  - job_name: 'promotion-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['promotion-service:9001']
+        labels:
+          service: 'promotion-service'
+          tier: 'promox'
+          domain: 'promotions'
+
+  - job_name: 'flashsale-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['flashsale-service:9002']
+        labels:
+          service: 'flashsale-service'
+          tier: 'promox'
+          domain: 'promotions'
+
+  - job_name: 'coupon-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['coupon-service:9003']
+        labels:
+          service: 'coupon-service'
+          tier: 'promox'
+          domain: 'promotions'
+
+  - job_name: 'reward-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['reward-service:9005']
+        labels:
+          service: 'reward-service'
+          tier: 'promox'
+          domain: 'loyalty'
+
+  - job_name: 'analytics-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['analytics-service:9006']
+        labels:
+          service: 'analytics-service'
+          tier: 'promox'
+          domain: 'analytics'
+
+  # Infrastructure - PostgreSQL
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+        labels:
+          service: 'postgresql'
+          tier: 'database'
+
+  # Infrastructure - Redis
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+        labels:
+          service: 'redis'
+          tier: 'cache'
+
+  # Infrastructure - Kafka
+  - job_name: 'kafka'
+    static_configs:
+      - targets: ['kafka-exporter:9308']
+        labels:
+          service: 'kafka'
+          tier: 'messaging'

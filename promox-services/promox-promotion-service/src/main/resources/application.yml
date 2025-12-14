@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: promox-promotion-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/promox_db
+    username: promox
+    password: promox123
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  redis:
+    host: localhost
+    port: 6379
+  kafka:
+    bootstrap-servers: localhost:9092
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connect-timeout: 5000
+            read-timeout: 5000
+
+server:
+  port: 9002
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+
+logging:
+  level:
+    com.promox.promotion: DEBUG
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html

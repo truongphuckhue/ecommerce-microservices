@@ -1,0 +1,404 @@
+{
+  "info": {
+    "name": "Promotion Service API",
+    "description": "Complete API collection for PromoX Promotion Service with Rules Engine",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:9002/api",
+      "type": "string"
+    },
+    {
+      "key": "promotionId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ruleId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. CRUD Operations",
+      "item": [
+        {
+          "name": "1. Create Promotion - Percentage Discount",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set('promotionId', jsonData.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campaignId\": 1,\n  \"name\": \"Black Friday 50% Off\",\n  \"code\": \"BF50\",\n  \"type\": \"PERCENTAGE\",\n  \"discountValue\": 50.00,\n  \"discountType\": \"PERCENTAGE\",\n  \"minOrderValue\": 100.00,\n  \"maxDiscountAmount\": 500.00,\n  \"usageLimit\": 10000,\n  \"perUserLimit\": 1,\n  \"stackable\": false,\n  \"priority\": 10,\n  \"validFrom\": \"2024-11-29T00:00:00\",\n  \"validTo\": \"2024-11-30T23:59:59\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/promotions", "host": ["{{baseUrl}}"], "path": ["promotions"]}
+          }
+        },
+        {
+          "name": "2. Create Promotion - Fixed Amount",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campaignId\": 1,\n  \"name\": \"VIP $100 Off\",\n  \"code\": \"VIP100\",\n  \"type\": \"FIXED_AMOUNT\",\n  \"discountValue\": 100.00,\n  \"discountType\": \"FIXED\",\n  \"minOrderValue\": 300.00,\n  \"usageLimit\": 5000,\n  \"perUserLimit\": 2,\n  \"stackable\": true,\n  \"priority\": 9,\n  \"validFrom\": \"2024-12-01T00:00:00\",\n  \"validTo\": \"2024-12-31T23:59:59\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/promotions", "host": ["{{baseUrl}}"], "path": ["promotions"]}
+          }
+        },
+        {
+          "name": "3. Create Promotion - Free Shipping",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campaignId\": 1,\n  \"name\": \"Free Shipping\",\n  \"code\": \"FREESHIP\",\n  \"type\": \"FREE_SHIPPING\",\n  \"discountValue\": 10.00,\n  \"discountType\": \"FIXED\",\n  \"minOrderValue\": 50.00,\n  \"usageLimit\": 20000,\n  \"stackable\": true,\n  \"priority\": 5,\n  \"validFrom\": \"2024-12-01T00:00:00\",\n  \"validTo\": \"2024-12-31T23:59:59\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/promotions", "host": ["{{baseUrl}}"], "path": ["promotions"]}
+          }
+        },
+        {
+          "name": "4. Get Promotion by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/promotions/{{promotionId}}", "host": ["{{baseUrl}}"], "path": ["promotions", "{{promotionId}}"]}
+          }
+        },
+        {
+          "name": "5. Get Promotion by Code",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/promotions/code/BF50", "host": ["{{baseUrl}}"], "path": ["promotions", "code", "BF50"]}
+          }
+        },
+        {
+          "name": "6. Get All Promotions (Paginated)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/promotions?page=0&size=10&sortBy=createdAt&sortDir=DESC",
+              "host": ["{{baseUrl}}"],
+              "path": ["promotions"],
+              "query": [
+                {"key": "page", "value": "0"},
+                {"key": "size", "value": "10"},
+                {"key": "sortBy", "value": "createdAt"},
+                {"key": "sortDir", "value": "DESC"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "7. Update Promotion",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Black Friday 50% Off - Extended\",\n  \"discountValue\": 55.00,\n  \"usageLimit\": 15000\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/promotions/{{promotionId}}", "host": ["{{baseUrl}}"], "path": ["promotions", "{{promotionId}}"]}
+          }
+        },
+        {
+          "name": "8. Delete Promotion",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/promotions/{{promotionId}}", "host": ["{{baseUrl}}"], "path": ["promotions", "{{promotionId}}"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Status Management",
+      "item": [
+        {
+          "name": "1. Activate Promotion",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/promotions/{{promotionId}}/activate", "host": ["{{baseUrl}}"], "path": ["promotions", "{{promotionId}}", "activate"]}
+          }
+        },
+        {
+          "name": "2. Pause Promotion",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/promotions/{{promotionId}}/pause", "host": ["{{baseUrl}}"], "path": ["promotions", "{{promotionId}}", "pause"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Query Operations",
+      "item": [
+        {
+          "name": "1. Get Active Promotions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/promotions/active", "host": ["{{baseUrl}}"], "path": ["promotions", "active"]}
+          }
+        },
+        {
+          "name": "2. Get Promotions by Campaign",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/promotions/campaign/1", "host": ["{{baseUrl}}"], "path": ["promotions", "campaign", "1"]}
+          }
+        },
+        {
+          "name": "3. Get Promotions by Status - ACTIVE",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/promotions/status/ACTIVE", "host": ["{{baseUrl}}"], "path": ["promotions", "status", "ACTIVE"]}
+          }
+        },
+        {
+          "name": "4. Search Promotions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/promotions/search?keyword=Black&page=0&size=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["promotions", "search"],
+              "query": [
+                {"key": "keyword", "value": "Black"},
+                {"key": "page", "value": "0"},
+                {"key": "size", "value": "10"}
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Rules Engine",
+      "item": [
+        {
+          "name": "1. Add Rule - Min Order Value",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set('ruleId', jsonData.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ruleType\": \"MIN_ORDER_VALUE\",\n  \"ruleConfig\": \"{\\\"minValue\\\": 100.00, \\\"currency\\\": \\\"USD\\\"}\",\n  \"priority\": 10,\n  \"isActive\": true\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/promotions/{{promotionId}}/rules", "host": ["{{baseUrl}}"], "path": ["promotions", "{{promotionId}}", "rules"]}
+          }
+        },
+        {
+          "name": "2. Add Rule - Product Category",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ruleType\": \"PRODUCT_CATEGORY\",\n  \"ruleConfig\": \"{\\\"categories\\\": [\\\"electronics\\\", \\\"computers\\\"], \\\"includeSubcategories\\\": true}\",\n  \"priority\": 9,\n  \"isActive\": true\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/promotions/{{promotionId}}/rules", "host": ["{{baseUrl}}"], "path": ["promotions", "{{promotionId}}", "rules"]}
+          }
+        },
+        {
+          "name": "3. Add Rule - User Segment",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ruleType\": \"USER_SEGMENT\",\n  \"ruleConfig\": \"{\\\"segment\\\": \\\"VIP\\\", \\\"tierLevel\\\": \\\"GOLD\\\"}\",\n  \"priority\": 8,\n  \"isActive\": true\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/promotions/{{promotionId}}/rules", "host": ["{{baseUrl}}"], "path": ["promotions", "{{promotionId}}", "rules"]}
+          }
+        },
+        {
+          "name": "4. Add Rule - Time Window",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ruleType\": \"TIME_WINDOW\",\n  \"ruleConfig\": \"{\\\"startTime\\\": \\\"00:00\\\", \\\"endTime\\\": \\\"23:59\\\", \\\"daysOfWeek\\\": [1,2,3,4,5,6,7]}\",\n  \"priority\": 7,\n  \"isActive\": true\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/promotions/{{promotionId}}/rules", "host": ["{{baseUrl}}"], "path": ["promotions", "{{promotionId}}", "rules"]}
+          }
+        },
+        {
+          "name": "5. Get All Rules",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/promotions/{{promotionId}}/rules", "host": ["{{baseUrl}}"], "path": ["promotions", "{{promotionId}}", "rules"]}
+          }
+        },
+        {
+          "name": "6. Delete Rule",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/promotions/rules/{{ruleId}}", "host": ["{{baseUrl}}"], "path": ["promotions", "rules", "{{ruleId}}"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Discount Calculation",
+      "item": [
+        {
+          "name": "1. Calculate Discount - Single Code",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"promotionCode\": \"BF50\",\n  \"userId\": 1,\n  \"orderTotal\": 200.00,\n  \"items\": [\n    {\n      \"productId\": 1,\n      \"productName\": \"iPhone 15 Pro\",\n      \"category\": \"electronics\",\n      \"price\": 150.00,\n      \"quantity\": 1\n    },\n    {\n      \"productId\": 2,\n      \"productName\": \"AirPods Pro\",\n      \"category\": \"electronics\",\n      \"price\": 50.00,\n      \"quantity\": 1\n    }\n  ],\n  \"userSegment\": \"VIP\",\n  \"location\": \"US\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/promotions/calculate", "host": ["{{baseUrl}}"], "path": ["promotions", "calculate"]}
+          }
+        },
+        {
+          "name": "2. Calculate Discount - Multiple Codes (Stacking)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"promotionCodes\": [\"VIP100\", \"FREESHIP\"],\n  \"userId\": 1,\n  \"orderTotal\": 500.00,\n  \"items\": [\n    {\n      \"productId\": 1,\n      \"productName\": \"MacBook Pro\",\n      \"category\": \"computers\",\n      \"price\": 500.00,\n      \"quantity\": 1\n    }\n  ],\n  \"userSegment\": \"VIP\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/promotions/calculate", "host": ["{{baseUrl}}"], "path": ["promotions", "calculate"]}
+          }
+        },
+        {
+          "name": "3. Validate Promotion Code",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": 1,\n  \"orderTotal\": 150.00,\n  \"items\": [\n    {\n      \"productId\": 3,\n      \"productName\": \"iPad Air\",\n      \"category\": \"electronics\",\n      \"price\": 150.00,\n      \"quantity\": 1\n    }\n  ],\n  \"userSegment\": \"REGULAR\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/promotions/validate/BF50", "host": ["{{baseUrl}}"], "path": ["promotions", "validate", "BF50"]}
+          }
+        },
+        {
+          "name": "4. Test Rule - Below Min Order Value",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"promotionCode\": \"BF50\",\n  \"userId\": 1,\n  \"orderTotal\": 50.00,\n  \"items\": [\n    {\n      \"productId\": 4,\n      \"productName\": \"Phone Case\",\n      \"category\": \"accessories\",\n      \"price\": 50.00,\n      \"quantity\": 1\n    }\n  ]\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/promotions/calculate", "host": ["{{baseUrl}}"], "path": ["promotions", "calculate"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Complete Promotion Lifecycle",
+      "item": [
+        {
+          "name": "Step 1 - Create Promotion with Rules",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "pm.collectionVariables.set('lifecyclePromotionId', jsonData.data.id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campaignId\": 1,\n  \"name\": \"Flash Sale 40% Off Electronics\",\n  \"code\": \"FLASH40\",\n  \"type\": \"PERCENTAGE\",\n  \"discountValue\": 40.00,\n  \"discountType\": \"PERCENTAGE\",\n  \"minOrderValue\": 75.00,\n  \"maxDiscountAmount\": 300.00,\n  \"usageLimit\": 1000,\n  \"perUserLimit\": 1,\n  \"stackable\": false,\n  \"priority\": 8,\n  \"validFrom\": \"2024-12-07T10:00:00\",\n  \"validTo\": \"2024-12-07T18:00:00\"\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/promotions", "host": ["{{baseUrl}}"], "path": ["promotions"]}
+          }
+        },
+        {
+          "name": "Step 2 - Add Min Order Rule",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ruleType\": \"MIN_ORDER_VALUE\",\n  \"ruleConfig\": \"{\\\"minValue\\\": 75.00}\",\n  \"priority\": 10,\n  \"isActive\": true\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/promotions/{{lifecyclePromotionId}}/rules", "host": ["{{baseUrl}}"], "path": ["promotions", "{{lifecyclePromotionId}}", "rules"]}
+          }
+        },
+        {
+          "name": "Step 3 - Add Category Rule",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ruleType\": \"PRODUCT_CATEGORY\",\n  \"ruleConfig\": \"{\\\"categories\\\": [\\\"electronics\\\"]}\",\n  \"priority\": 9,\n  \"isActive\": true\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/promotions/{{lifecyclePromotionId}}/rules", "host": ["{{baseUrl}}"], "path": ["promotions", "{{lifecyclePromotionId}}", "rules"]}
+          }
+        },
+        {
+          "name": "Step 4 - Activate Promotion",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {"raw": "{{baseUrl}}/promotions/{{lifecyclePromotionId}}/activate", "host": ["{{baseUrl}}"], "path": ["promotions", "{{lifecyclePromotionId}}", "activate"]}
+          }
+        },
+        {
+          "name": "Step 5 - Test Discount Calculation",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"promotionCode\": \"FLASH40\",\n  \"userId\": 1,\n  \"orderTotal\": 200.00,\n  \"items\": [\n    {\n      \"productId\": 1,\n      \"productName\": \"Laptop\",\n      \"category\": \"electronics\",\n      \"price\": 200.00,\n      \"quantity\": 1\n    }\n  ]\n}"
+            },
+            "url": {"raw": "{{baseUrl}}/promotions/calculate", "host": ["{{baseUrl}}"], "path": ["promotions", "calculate"]}
+          }
+        }
+      ]
+    }
+  ]
+}
