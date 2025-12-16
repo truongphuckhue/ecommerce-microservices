@@ -112,8 +112,8 @@ public class AuthServiceImpl implements AuthService {
 
             // Generate tokens
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            String accessToken = jwtUtil.generateToken(userDetails);
-            String refreshToken = jwtUtil.generateRefreshToken(userDetails);
+            String accessToken = jwtUtil.generateToken(userDetails.getUsername());
+            String refreshToken = jwtUtil.generateRefreshToken(userDetails.getUsername());
 
             // Save refresh token to database
             saveRefreshToken(user, refreshToken);
@@ -124,7 +124,7 @@ public class AuthServiceImpl implements AuthService {
                     .accessToken(accessToken)
                     .refreshToken(refreshToken)
                     .tokenType("Bearer")
-                    .expiresIn(jwtUtil.getExpirationTime() / 1000)
+                    .expiresIn(jwtUtil.getAccessTokenExpirationInSeconds())  // ← FIX
                     .user(AuthResponse.UserInfo.builder()
                             .id(user.getId())
                             .username(user.getUsername())
@@ -174,11 +174,11 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // Extract username and load user details
-        String username = jwtUtil.extractUsername(refreshTokenValue);
+        String username = jwtUtil.getUsernameFromToken(refreshTokenValue);
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
         // Generate new access token
-        String newAccessToken = jwtUtil.generateToken(userDetails);
+        String newAccessToken = jwtUtil.generateToken(userDetails.getUsername());
 
         log.info("Token refreshed successfully for user: {}", username);
 
@@ -187,7 +187,7 @@ public class AuthServiceImpl implements AuthService {
                 .accessToken(newAccessToken)
                 .refreshToken(refreshTokenValue)
                 .tokenType("Bearer")
-                .expiresIn(jwtUtil.getExpirationTime() / 1000)
+                .expiresIn(jwtUtil.getAccessTokenExpirationInSeconds())  // ← FIX: bỏ / 1000
                 .user(AuthResponse.UserInfo.builder()
                         .id(user.getId())
                         .username(user.getUsername())
@@ -210,14 +210,14 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // Add token to blacklist in Redis
-        String username = jwtUtil.extractUsername(token);
-        Long expirationTime = jwtUtil.getExpirationTime();
-        
+        String username = jwtUtil.getUsernameFromToken(token);
+        Long expirationTimeInMillis = jwtUtil.getAccessTokenExpirationInMillis();  // ← FIX
+
         redisTemplate.opsForValue().set(
                 TOKEN_BLACKLIST_PREFIX + token,
                 username,
-                expirationTime,
-                TimeUnit.MILLISECONDS
+                expirationTimeInMillis,
+                TimeUnit.MILLISECONDS  // ← Giờ đúng rồi
         );
 
         log.info("User logged out successfully: {}", username);
@@ -243,7 +243,8 @@ public class AuthServiceImpl implements AuthService {
         RefreshToken refreshToken = RefreshToken.builder()
                 .token(token)
                 .user(user)
-                .expiryDate(LocalDateTime.now().plusSeconds(jwtUtil.getRefreshExpirationTime() / 1000))
+                .expiryDate(LocalDateTime.now().plusSeconds(
+                        jwtUtil.getRefreshTokenExpirationInSeconds()))  // ← FIX: dùng method mới
                 .revoked(false)
                 .createdAt(LocalDateTime.now())
                 .build();

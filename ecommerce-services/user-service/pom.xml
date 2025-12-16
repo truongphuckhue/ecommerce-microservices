@@ -13,7 +13,7 @@
 
     <artifactId>auth-service</artifactId>
 
-    <n>Auth Service</n>
+    <name>Auth Service</name>
     <description>Authentication and Authorization Service</description>
 
     <dependencies>

@@ -111,7 +111,7 @@ class AuthServiceImplTest {
         assertThat(response).isNotNull();
         assertThat(response.getUsername()).isEqualTo("testuser");
         assertThat(response.getEmail()).isEqualTo("test@example.com");
-        
+
         verify(userRepository).existsByUsername("testuser");
         verify(userRepository).existsByEmail("test@example.com");
         verify(passwordEncoder).encode("Test@1234");
@@ -154,20 +154,29 @@ class AuthServiceImplTest {
     void loginUser_Success() {
         // Given
         when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
-        
+
         Authentication authentication = mock(Authentication.class);
         UserDetails userDetails = org.springframework.security.core.userdetails.User
                 .withUsername("testuser")
                 .password("encoded_password")
                 .authorities("ROLE_USER")
                 .build();
-        
+
         when(authentication.getPrincipal()).thenReturn(userDetails);
         when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                 .thenReturn(authentication);
-        when(jwtUtil.generateToken(any(UserDetails.class))).thenReturn("access_token");
-        when(jwtUtil.generateRefreshToken(any(UserDetails.class))).thenReturn("refresh_token");
-        when(jwtUtil.getExpirationTime()).thenReturn(86400000L);
+
+        // ✅ FIX 1: generateToken() nhận String, không phải UserDetails
+        when(jwtUtil.generateToken(anyString())).thenReturn("access_token");
+
+        // ✅ FIX 2: generateRefreshToken() nhận String, không phải UserDetails
+        when(jwtUtil.generateRefreshToken(anyString())).thenReturn("refresh_token");
+
+        // ✅ FIX 3: Method đã đổi tên và trả về seconds
+        when(jwtUtil.getAccessTokenExpirationInSeconds()).thenReturn(86400L);
+
+        // ✅ FIX 4: Mock getRefreshTokenExpirationInSeconds() cho saveRefreshToken()
+        when(jwtUtil.getRefreshTokenExpirationInSeconds()).thenReturn(604800L);
 
         // When
         AuthResponse response = authService.login(loginRequest);
@@ -180,8 +189,13 @@ class AuthServiceImplTest {
 
         verify(userRepository).findByUsername("testuser");
         verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
-        verify(jwtUtil).generateToken(any(UserDetails.class));
-        verify(jwtUtil).generateRefreshToken(any(UserDetails.class));
+
+        // ✅ FIX 5: Verify với anyString()
+        verify(jwtUtil).generateToken(anyString());
+        verify(jwtUtil).generateRefreshToken(anyString());
+
+        // ✅ FIX 6: Verify refreshToken được save
+        verify(refreshTokenRepository).save(any());
     }
 
     @Test
