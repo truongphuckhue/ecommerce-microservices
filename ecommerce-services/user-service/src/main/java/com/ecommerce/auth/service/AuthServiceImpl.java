@@ -6,6 +6,7 @@ import com.ecommerce.auth.entity.RefreshToken;
 import com.ecommerce.auth.entity.User;
 import com.ecommerce.auth.repository.RefreshTokenRepository;
 import com.ecommerce.auth.repository.UserRepository;
+import com.ecommerce.auth.security.InputSanitizer;
 import com.ecommerce.auth.security.PasswordSecurityService;
 import com.ecommerce.auth.util.JwtUtil;
 import com.ecommerce.auth.common.exception.BusinessException;
@@ -45,6 +46,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserDetailsService userDetailsService;
     private final RedisTemplate<String, String> redisTemplate;
     private final PasswordSecurityService passwordSecurityService;
+    private final InputSanitizer inputSanitizer;
 
     private static final String TOKEN_BLACKLIST_PREFIX = "blacklist:";
     private static final int MAX_FAILED_ATTEMPTS = 5;
@@ -55,30 +57,37 @@ public class AuthServiceImpl implements AuthService {
     public UserResponse register(RegisterRequest request) {
         log.info("Registering new user: {}", request.getUsername());
 
+        // STEP 1: Sanitize all inputs FIRST
+        String username = inputSanitizer.sanitizeUsername(request.getUsername());
+        String email = inputSanitizer.sanitizeEmail(request.getEmail());
+        String firstName = inputSanitizer.sanitizeText(request.getFirstName());
+        String lastName = inputSanitizer.sanitizeText(request.getLastName());
+
+        // STEP 2: Password security validation
         passwordSecurityService.validatePasswordSecurity(
                 request.getPassword(),
                 request.getUsername(),
                 request.getEmail()
         );
 
-        // Validate username uniqueness
+        // STEP 3: Check duplicates
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new BusinessException("USERNAME_EXISTS", "Username already exists");
         }
 
-        // Validate email uniqueness
+
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new BusinessException("EMAIL_EXISTS", "Email already exists");
         }
 
         try{
-            // Create user
+            // STEP 4: Create user with SANITIZED values
             User user = User.builder()
-                    .username(request.getUsername())
-                    .email(request.getEmail())
+                    .username(username)
+                    .email(email)
                     .password(passwordEncoder.encode(request.getPassword()))
-                    .firstName(request.getFirstName())
-                    .lastName(request.getLastName())
+                    .firstName(firstName)
+                    .lastName(lastName)
                     .phoneNumber(request.getPhoneNumber())
                     .enabled(true)
                     .accountNonExpired(true)

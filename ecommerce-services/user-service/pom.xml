@@ -42,6 +42,12 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Jsoup -->
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+        </dependency>
+
         <!-- h2 for test
         <dependency>
             <groupId>com.h2database</groupId>
