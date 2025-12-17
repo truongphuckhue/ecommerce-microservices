@@ -8,11 +8,13 @@ import com.ecommerce.auth.repository.RefreshTokenRepository;
 import com.ecommerce.auth.repository.UserRepository;
 import com.ecommerce.auth.security.InputSanitizer;
 import com.ecommerce.auth.security.PasswordSecurityService;
+import com.ecommerce.auth.security.RateLimitService;
 import com.ecommerce.auth.util.JwtUtil;
 import com.ecommerce.auth.common.exception.BusinessException;
 import com.ecommerce.auth.common.exception.ResourceNotFoundException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -45,8 +47,11 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
     private final RedisTemplate<String, String> redisTemplate;
+
     private final PasswordSecurityService passwordSecurityService;
     private final InputSanitizer inputSanitizer;
+    private final RateLimitService rateLimitService;
+    private final HttpServletRequest httpRequest;
 
     private static final String TOKEN_BLACKLIST_PREFIX = "blacklist:";
     private static final int MAX_FAILED_ATTEMPTS = 5;
@@ -56,6 +61,23 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public UserResponse register(RegisterRequest request) {
         log.info("Registering new user: {}", request.getUsername());
+
+        // STEP 0: Rate limiting check (FIRST!)
+        String clientIp = getClientIp();
+        rateLimitService.checkRateLimit(
+                "register:ip:" + clientIp,
+                5,      // 5 attempts
+                3600,   // per hour
+                "Too many registration attempts from this IP address"
+        );
+
+        // Also rate limit by email
+        rateLimitService.checkRateLimit(
+                "register:email:" + request.getEmail(),
+                3,      // 3 attempts
+                86400,  // per day
+                "Too many registration attempts with this email"
+        );
 
         // STEP 1: Sanitize all inputs FIRST
         String username = inputSanitizer.sanitizeUsername(request.getUsername());
@@ -325,5 +347,18 @@ public class AuthServiceImpl implements AuthService {
 
     public boolean isTokenBlacklisted(String token) {
         return Boolean.TRUE.equals(redisTemplate.hasKey(TOKEN_BLACKLIST_PREFIX + token));
+    }
+
+    /**
+     * Extract client IP from request
+     * Handles X-Forwarded-For header for proxied requests
+     */
+    private String getClientIp() {
+        String xForwardedFor = httpRequest.getHeader("X-Forwarded-For");
+        if (xForwardedFor != null && !xForwardedFor.isEmpty()) {
+            // X-Forwarded-For: client, proxy1, proxy2
+            return xForwardedFor.split(",")[0].trim();
+        }
+        return httpRequest.getRemoteAddr();
     }
 }
