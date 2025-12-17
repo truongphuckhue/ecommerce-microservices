@@ -13,6 +13,7 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -62,26 +63,43 @@ public class AuthServiceImpl implements AuthService {
             throw new BusinessException("EMAIL_EXISTS", "Email already exists");
         }
 
-        // Create user
-        User user = User.builder()
-                .username(request.getUsername())
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .phoneNumber(request.getPhoneNumber())
-                .enabled(true)
-                .accountNonExpired(true)
-                .accountNonLocked(true)
-                .credentialsNonExpired(true)
-                .roles(Set.of("ROLE_USER"))
-                .failedLoginAttempts(0)
-                .build();
+        try{
+            // Create user
+            User user = User.builder()
+                    .username(request.getUsername())
+                    .email(request.getEmail())
+                    .password(passwordEncoder.encode(request.getPassword()))
+                    .firstName(request.getFirstName())
+                    .lastName(request.getLastName())
+                    .phoneNumber(request.getPhoneNumber())
+                    .enabled(true)
+                    .accountNonExpired(true)
+                    .accountNonLocked(true)
+                    .credentialsNonExpired(true)
+                    .roles(Set.of("ROLE_USER"))
+                    .failedLoginAttempts(0)
+                    .build();
 
-        user = userRepository.save(user); // ← Có thể duplicate nếu 2 requests cùng lúc
-        log.info("User registered successfully: {}", user.getUsername());
+            user = userRepository.save(user); // ← Có thể duplicate nếu 2 requests cùng lúc -> đẩyvaofo trycatch
+            log.info("User registered successfully: {}", user.getUsername());
 
-        return UserResponse.fromUser(user);
+            return UserResponse.fromUser(user);
+        } catch (DataIntegrityViolationException e) {
+            // Database constraint caught the duplicate
+            String message = e.getMessage();
+            if (message != null) {
+                if (message.contains("uk_username")) {
+                    log.warn("Duplicate username caught by database constraint: {}", request.getUsername());
+                    throw new BusinessException("USERNAME_EXISTS", "Username already exists");
+                }
+                if (message.contains("uk_email")) {
+                    log.warn("Duplicate email caught by database constraint: {}", request.getEmail());
+                    throw new BusinessException("EMAIL_EXISTS", "Email already exists");
+                }
+            }
+            throw new BusinessException("DATABASE_ERROR", "Database constraint violation");
+        }
+
     }
 
     @Override

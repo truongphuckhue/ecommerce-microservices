@@ -13,9 +13,17 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "users", indexes = {
-    @Index(name = "idx_username", columnList = "username"),
-    @Index(name = "idx_email", columnList = "email")
+@Table(name = "users",
+        indexes = {
+            @Index(name = "idx_username", columnList = "username"),
+            @Index(name = "idx_email", columnList = "email"),
+            @Index(name = "idx_email_verification_token", columnList = "emailVerificationToken"),
+            @Index(name = "idx_created_at", columnList = "createdAt"),
+            @Index(name = "idx_last_login", columnList = "lastLogin")
+        },
+        uniqueConstraints = {
+            @UniqueConstraint(name = "uk_username", columnNames = "username"),
+            @UniqueConstraint(name = "uk_email", columnNames = "email")
 })
 @Data
 @NoArgsConstructor
