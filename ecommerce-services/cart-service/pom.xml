@@ -13,15 +13,15 @@
 
     <artifactId>cart-service</artifactId>
 
-    <n>Cart Service</n>
+    <name>Cart Service</name>
     <description>Shopping Cart Service with Redis</description>
 
     <dependencies>
         <!-- Common Library -->
-        <dependency>
+        <!--<dependency>
             <groupId>com.ecommerce</groupId>
             <artifactId>common-lib</artifactId>
-        </dependency>
+        </dependency>-->
 
         <!-- Spring Boot Web -->
         <dependency>

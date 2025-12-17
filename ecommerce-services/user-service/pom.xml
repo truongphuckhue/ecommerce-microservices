@@ -18,10 +18,10 @@
 
     <dependencies>
         <!-- Common Library -->
-        <dependency>
+        <!--<dependency>
             <groupId>com.ecommerce</groupId>
             <artifactId>common-lib</artifactId>
-        </dependency>
+        </dependency>-->
 
         <!-- Spring Boot Web -->
         <dependency>
@@ -41,6 +41,13 @@
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
+
+        <!-- h2 for test
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>-->
 
         <!-- Spring Security -->
         <dependency>

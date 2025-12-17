@@ -9,11 +9,12 @@
         <groupId>com.ecommerce</groupId>
         <artifactId>ecommerce-backend</artifactId>
         <version>1.0.0</version>
+        <relativePath/>
     </parent>
 
     <artifactId>eureka-server</artifactId>
 
-    <n>Eureka Server</n>
+    <name>Eureka Server</name>
     <description>Service Discovery Server</description>
 
     <dependencies>

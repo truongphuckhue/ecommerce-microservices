@@ -13,15 +13,15 @@
 
     <artifactId>payment-service</artifactId>
 
-    <n>Payment Service</n>
+    <name>Payment Service</name>
     <description>Payment Processing Service</description>
 
     <dependencies>
         <!-- Common Library -->
-        <dependency>
+        <!--<dependency>
             <groupId>com.ecommerce</groupId>
             <artifactId>common-lib</artifactId>
-        </dependency>
+        </dependency>-->
 
         <!-- Spring Boot Web -->
         <dependency>

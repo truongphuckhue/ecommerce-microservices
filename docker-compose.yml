@@ -11,7 +11,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: ecommerce_platform
+      POSTGRES_DB: ecommerce_platform  # Default database
     ports:
       - "5432:5432"
     volumes:
@@ -73,316 +73,319 @@ services:
   # DISCOVERY & GATEWAY
   # ============================================
 
-  service-discovery:
-    build:
-      context: ./infrastructure/service-discovery
-      dockerfile: Dockerfile
-    container_name: service-discovery
-    ports:
-      - "8761:8761"
-    environment:
-      SPRING_PROFILES_ACTIVE: docker
-    networks:
-      - ecommerce-network
-
-  api-gateway:
-    build:
-      context: ./infrastructure/api-gateway
-      dockerfile: Dockerfile
-    container_name: api-gateway
-    depends_on:
-      - service-discovery
-      - redis
-    ports:
-      - "8080:8080"
-    environment:
-      SPRING_PROFILES_ACTIVE: docker
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
-      SPRING_REDIS_HOST: redis
-      SPRING_REDIS_PORT: 6379
-    networks:
-      - ecommerce-network
-
-  # ============================================
-  # E-COMMERCE SERVICES
-  # ============================================
-
-  product-service:
-    build:
-      context: ./ecommerce-services/product-service
-      dockerfile: Dockerfile
-    container_name: product-service
-    depends_on:
-      - postgres
-      - service-discovery
-    ports:
-      - "8001:8001"
-    environment:
-      SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecommerce_platform
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
-      SERVER_PORT: 8001
-    networks:
-      - ecommerce-network
-
-  inventory-service:
-    build:
-      context: ./ecommerce-services/inventory-service
-      dockerfile: Dockerfile
-    container_name: inventory-service
-    depends_on:
-      - postgres
-      - service-discovery
-      - redis
-    ports:
-      - "8002:8002"
-    environment:
-      SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecommerce_platform
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
-      SPRING_REDIS_HOST: redis
-      SPRING_REDIS_PORT: 6379
-      SERVER_PORT: 8002
-    networks:
-      - ecommerce-network
-
-  order-service:
-    build:
-      context: ./ecommerce-services/order-service
-      dockerfile: Dockerfile
-    container_name: order-service
-    depends_on:
-      - postgres
-      - service-discovery
-      - kafka
-    ports:
-      - "8003:8003"
-    environment:
-      SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecommerce_platform
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      SERVER_PORT: 8003
-    networks:
-      - ecommerce-network
-
-  payment-service:
-    build:
-      context: ./ecommerce-services/payment-service
-      dockerfile: Dockerfile
-    container_name: payment-service
-    depends_on:
-      - postgres
-      - service-discovery
-    ports:
-      - "8004:8004"
-    environment:
-      SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecommerce_platform
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
-      SERVER_PORT: 8004
-    networks:
-      - ecommerce-network
-
-  user-service:
-    build:
-      context: ./ecommerce-services/user-service
-      dockerfile: Dockerfile
-    container_name: user-service
-    depends_on:
-      - postgres
-      - service-discovery
-    ports:
-      - "8005:8005"
-    environment:
-      SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecommerce_platform
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
-      SERVER_PORT: 8005
-    networks:
-      - ecommerce-network
-
-  cart-service:
-    build:
-      context: ./ecommerce-services/cart-service
-      dockerfile: Dockerfile
-    container_name: cart-service
-    depends_on:
-      - postgres
-      - service-discovery
-      - redis
-    ports:
-      - "8006:8006"
-    environment:
-      SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecommerce_platform
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
-      SPRING_REDIS_HOST: redis
-      SPRING_REDIS_PORT: 6379
-      SERVER_PORT: 8006
-    networks:
-      - ecommerce-network
-
-  notification-service:
-    build:
-      context: ./ecommerce-services/notification-service
-      dockerfile: Dockerfile
-    container_name: notification-service
-    depends_on:
-      - postgres
-      - service-discovery
-      - kafka
-    ports:
-      - "8007:8007"
-    environment:
-      SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecommerce_platform
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      SERVER_PORT: 8007
-    networks:
-      - ecommerce-network
+#  service-discovery:
+#    build:
+#      context: ./infrastructure/service-discovery
+#      dockerfile: Dockerfile
+#    container_name: service-discovery
+#    ports:
+#      - "8761:8761"
+#    environment:
+#      SPRING_PROFILES_ACTIVE: docker
+#    networks:
+#      - ecommerce-network
+#
+#  api-gateway:
+#    build:
+#      context: ./infrastructure/api-gateway
+#      dockerfile: Dockerfile
+#    container_name: api-gateway
+#    depends_on:
+#      - service-discovery
+#      - redis
+#    ports:
+#      - "8080:8080"
+#    environment:
+#      SPRING_PROFILES_ACTIVE: docker
+#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
+#      SPRING_REDIS_HOST: redis
+#      SPRING_REDIS_PORT: 6379
+#    networks:
+#      - ecommerce-network
 
   # ============================================
-  # PROMOX ENGINE SERVICES
+  # E-COMMERCE SERVICES (Separate Databases)
   # ============================================
 
-  campaign-service:
-    build:
-      context: ./promox-services/campaign-service
-      dockerfile: Dockerfile
-    container_name: campaign-service
-    depends_on:
-      - postgres
-      - service-discovery
-    ports:
-      - "9000:9000"
-    environment:
-      SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecommerce_platform
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
-      SERVER_PORT: 9000
-    networks:
-      - ecommerce-network
+#  product-service:
+#    build:
+#      context: ./ecommerce-services/product-service
+#      dockerfile: Dockerfile
+#    container_name: product-service
+#    depends_on:
+#      - postgres
+#      - service-discovery
+#    ports:
+#      - "8001:8001"
+#    environment:
+#      SPRING_PROFILES_ACTIVE: docker
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecommerce_product
+#      SPRING_DATASOURCE_USERNAME: postgres
+#      SPRING_DATASOURCE_PASSWORD: postgres
+#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
+#      SERVER_PORT: 8001
+#    networks:
+#      - ecommerce-network
+#
+#  inventory-service:
+#    build:
+#      context: ./ecommerce-services/inventory-service
+#      dockerfile: Dockerfile
+#    container_name: inventory-service
+#    depends_on:
+#      - postgres
+#      - service-discovery
+#      - redis
+#    ports:
+#      - "8002:8002"
+#    environment:
+#      SPRING_PROFILES_ACTIVE: docker
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecommerce_inventory
+#      SPRING_DATASOURCE_USERNAME: postgres
+#      SPRING_DATASOURCE_PASSWORD: postgres
+#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
+#      SPRING_REDIS_HOST: redis
+#      SPRING_REDIS_PORT: 6379
+#      SERVER_PORT: 8002
+#    networks:
+#      - ecommerce-network
+#
+#  order-service:
+#    build:
+#      context: ./ecommerce-services/order-service
+#      dockerfile: Dockerfile
+#    container_name: order-service
+#    depends_on:
+#      - postgres
+#      - service-discovery
+#      - kafka
+#    ports:
+#      - "8003:8003"
+#    environment:
+#      SPRING_PROFILES_ACTIVE: docker
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecommerce_order
+#      SPRING_DATASOURCE_USERNAME: postgres
+#      SPRING_DATASOURCE_PASSWORD: postgres
+#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
+#      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+#      SERVER_PORT: 8003
+#    networks:
+#      - ecommerce-network
+#
+#  payment-service:
+#    build:
+#      context: ./ecommerce-services/payment-service
+#      dockerfile: Dockerfile
+#    container_name: payment-service
+#    depends_on:
+#      - postgres
+#      - service-discovery
+#    ports:
+#      - "8004:8004"
+#    environment:
+#      SPRING_PROFILES_ACTIVE: docker
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecommerce_payment
+#      SPRING_DATASOURCE_USERNAME: postgres
+#      SPRING_DATASOURCE_PASSWORD: postgres
+#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
+#      SERVER_PORT: 8004
+#    networks:
+#      - ecommerce-network
 
-  promotion-service:
-    build:
-      context: ./promox-services/promotion-service
-      dockerfile: Dockerfile
-    container_name: promotion-service
-    depends_on:
-      - postgres
-      - service-discovery
-    ports:
-      - "9001:9001"
-    environment:
-      SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecommerce_platform
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
-      SERVER_PORT: 9001
-    networks:
-      - ecommerce-network
+#  user-service:
+#    build:
+#      context: ./ecommerce-services/user-service
+#      dockerfile: Dockerfile
+#    container_name: user-service
+#    depends_on:
+#      - postgres
+#      - service-discovery
+#    ports:
+#      - "8005:8005"
+#    environment:
+#      SPRING_PROFILES_ACTIVE: docker
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecommerce_auth
+#      SPRING_DATASOURCE_USERNAME: postgres
+#      SPRING_DATASOURCE_PASSWORD: postgres
+#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
+#      SERVER_PORT: 8005
+#    networks:
+#      - ecommerce-network
 
-  flashsale-service:
-    build:
-      context: ./promox-services/flashsale-service
-      dockerfile: Dockerfile
-    container_name: flashsale-service
-    depends_on:
-      - postgres
-      - service-discovery
-      - redis
-    ports:
-      - "9002:9002"
-    environment:
-      SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecommerce_platform
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
-      SPRING_REDIS_HOST: redis
-      SPRING_REDIS_PORT: 6379
-      SERVER_PORT: 9002
-    networks:
-      - ecommerce-network
+#  cart-service:
+#    build:
+#      context: ./ecommerce-services/cart-service
+#      dockerfile: Dockerfile
+#    container_name: cart-service
+#    depends_on:
+#      - postgres
+#      - service-discovery
+#      - redis
+#    ports:
+#      - "8006:8006"
+#    environment:
+#      SPRING_PROFILES_ACTIVE: docker
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecommerce_cart
+#      SPRING_DATASOURCE_USERNAME: postgres
+#      SPRING_DATASOURCE_PASSWORD: postgres
+#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
+#      SPRING_REDIS_HOST: redis
+#      SPRING_REDIS_PORT: 6379
+#      SERVER_PORT: 8006
+#    networks:
+#      - ecommerce-network
+#
+#  notification-service:
+#    build:
+#      context: ./ecommerce-services/notification-service
+#      dockerfile: Dockerfile
+#    container_name: notification-service
+#    depends_on:
+#      - postgres
+#      - service-discovery
+#      - kafka
+#    ports:
+#      - "8007:8007"
+#    environment:
+#      SPRING_PROFILES_ACTIVE: docker
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecommerce_notification
+#      SPRING_DATASOURCE_USERNAME: postgres
+#      SPRING_DATASOURCE_PASSWORD: postgres
+#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
+#      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+#      SERVER_PORT: 8007
+#    networks:
+#      - ecommerce-network
 
-  coupon-service:
-    build:
-      context: ./promox-services/coupon-service
-      dockerfile: Dockerfile
-    container_name: coupon-service
-    depends_on:
-      - postgres
-      - service-discovery
-    ports:
-      - "9003:9003"
-    environment:
-      SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecommerce_platform
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
-      SERVER_PORT: 9003
-    networks:
-      - ecommerce-network
+  # ============================================
+  # PROMOX ENGINE SERVICES (Shared Database)
+  # ============================================
+  # All Promox services use same database (promox_db)
+  # But each service uses different schema
+  # This is set in application-docker.yml of each service
 
-  reward-service:
-    build:
-      context: ./promox-services/reward-service
-      dockerfile: Dockerfile
-    container_name: reward-service
-    depends_on:
-      - postgres
-      - service-discovery
-    ports:
-      - "9005:9005"
-    environment:
-      SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecommerce_platform
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
-      SERVER_PORT: 9005
-    networks:
-      - ecommerce-network
-
-  analytics-service:
-    build:
-      context: ./promox-services/analytics-service
-      dockerfile: Dockerfile
-    container_name: analytics-service
-    depends_on:
-      - postgres
-      - service-discovery
-    ports:
-      - "9006:9006"
-    environment:
-      SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecommerce_platform
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
-      SERVER_PORT: 9006
-    networks:
-      - ecommerce-network
+#  campaign-service:
+#    build:
+#      context: promox-engine/promox-campaign-service
+#      dockerfile: Dockerfile
+#    container_name: promox-campaign-service
+#    depends_on:
+#      - postgres
+#      - service-discovery
+#    ports:
+#      - "9000:9000"
+#    environment:
+#      SPRING_PROFILES_ACTIVE: docker
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/promox_db
+#      SPRING_DATASOURCE_USERNAME: postgres
+#      SPRING_DATASOURCE_PASSWORD: postgres
+#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
+#      SERVER_PORT: 9000
+#    networks:
+#      - ecommerce-network
+#
+#  promotion-service:
+#    build:
+#      context: promox-engine/promox-promotion-service
+#      dockerfile: Dockerfile
+#    container_name: promox-promotion-service
+#    depends_on:
+#      - postgres
+#      - service-discovery
+#    ports:
+#      - "9001:9001"
+#    environment:
+#      SPRING_PROFILES_ACTIVE: docker
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/promox_db
+#      SPRING_DATASOURCE_USERNAME: postgres
+#      SPRING_DATASOURCE_PASSWORD: postgres
+#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
+#      SERVER_PORT: 9001
+#    networks:
+#      - ecommerce-network
+#
+#  flashsale-service:
+#    build:
+#      context: promox-engine/promox-flashsale-service
+#      dockerfile: Dockerfile
+#    container_name: promox-flashsale-service
+#    depends_on:
+#      - postgres
+#      - service-discovery
+#      - redis
+#    ports:
+#      - "9002:9002"
+#    environment:
+#      SPRING_PROFILES_ACTIVE: docker
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/promox_db
+#      SPRING_DATASOURCE_USERNAME: postgres
+#      SPRING_DATASOURCE_PASSWORD: postgres
+#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
+#      SPRING_REDIS_HOST: redis
+#      SPRING_REDIS_PORT: 6379
+#      SERVER_PORT: 9002
+#    networks:
+#      - ecommerce-network
+#
+#  coupon-service:
+#    build:
+#      context: promox-engine/promox-coupon-service
+#      dockerfile: Dockerfile
+#    container_name: promox-coupon-service
+#    depends_on:
+#      - postgres
+#      - service-discovery
+#    ports:
+#      - "9003:9003"
+#    environment:
+#      SPRING_PROFILES_ACTIVE: docker
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/promox_db
+#      SPRING_DATASOURCE_USERNAME: postgres
+#      SPRING_DATASOURCE_PASSWORD: postgres
+#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
+#      SERVER_PORT: 9003
+#    networks:
+#      - ecommerce-network
+#
+#  reward-service:
+#    build:
+#      context: promox-engine/promox-reward-service
+#      dockerfile: Dockerfile
+#    container_name: promox-reward-service
+#    depends_on:
+#      - postgres
+#      - service-discovery
+#    ports:
+#      - "9005:9005"
+#    environment:
+#      SPRING_PROFILES_ACTIVE: docker
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/promox_db
+#      SPRING_DATASOURCE_USERNAME: postgres
+#      SPRING_DATASOURCE_PASSWORD: postgres
+#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
+#      SERVER_PORT: 9005
+#    networks:
+#      - ecommerce-network
+#
+#  analytics-service:
+#    build:
+#      context: promox-engine/promox-analytics-service
+#      dockerfile: Dockerfile
+#    container_name: promox-analytics-service
+#    depends_on:
+#      - postgres
+#      - service-discovery
+#    ports:
+#      - "9006:9006"
+#    environment:
+#      SPRING_PROFILES_ACTIVE: docker
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/promox_db
+#      SPRING_DATASOURCE_USERNAME: postgres
+#      SPRING_DATASOURCE_PASSWORD: postgres
+#      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-discovery:8761/eureka/
+#      SERVER_PORT: 9006
+#    networks:
+#      - ecommerce-network
 
 networks:
   ecommerce-network:

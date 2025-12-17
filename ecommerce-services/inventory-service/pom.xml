@@ -18,10 +18,10 @@
 
     <dependencies>
         <!-- Common Library -->
-        <dependency>
+        <!--<dependency>
             <groupId>com.ecommerce</groupId>
             <artifactId>common-lib</artifactId>
-        </dependency>
+        </dependency>-->
 
         <!-- Spring Boot Web -->
         <dependency>

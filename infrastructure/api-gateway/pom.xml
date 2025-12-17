@@ -9,11 +9,12 @@
         <groupId>com.ecommerce</groupId>
         <artifactId>ecommerce-backend</artifactId>
         <version>1.0.0</version>
+        <relativePath/>
     </parent>
 
     <artifactId>api-gateway</artifactId>
 
-    <n>API Gateway</n>
+    <name>API Gateway</name>
     <description>Spring Cloud Gateway</description>
 
     <dependencies>

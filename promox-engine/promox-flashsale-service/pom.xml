@@ -5,12 +5,16 @@
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <parent>
+    <!--<parent>
         <groupId>com.promox</groupId>
         <artifactId>promox-engine</artifactId>
         <version>1.0.0-SNAPSHOT</version>
+    </parent>-->
+    <parent>
+        <groupId>com.ecommerce</groupId>
+        <artifactId>ecommerce-backend</artifactId>
+        <version>1.0.0</version>
     </parent>
-
     <artifactId>promox-flashsale-service</artifactId>
     <packaging>jar</packaging>
 
@@ -18,10 +22,10 @@
     <description>Flash Sales Management with Redis</description>
 
     <dependencies>
-        <dependency>
+        <!--<dependency>
             <groupId>com.promox</groupId>
             <artifactId>promox-common</artifactId>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>

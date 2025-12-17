@@ -10,5 +10,13 @@
     <file url="file://$PROJECT_DIR$/ecommerce-services/user-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/infrastructure/api-gateway/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/infrastructure/service-discovery/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/promox-engine/promox-analytics-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/promox-engine/promox-campaign-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/promox-engine/promox-coupon-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/promox-engine/promox-flashsale-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/promox-engine/promox-promotion-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/promox-engine/promox-reward-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
   </component>
 </project>

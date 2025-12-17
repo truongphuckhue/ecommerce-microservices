@@ -13,15 +13,15 @@
 
     <artifactId>notification-service</artifactId>
 
-    <n>Notification Service</n>
+    <name>Notification Service</name>
     <description>Event-Driven Notification Service</description>
 
     <dependencies>
         <!-- Common Library -->
-        <dependency>
+        <!--<dependency>
             <groupId>com.ecommerce</groupId>
             <artifactId>common-lib</artifactId>
-        </dependency>
+        </dependency>-->
 
         <!-- Spring Boot Web -->
         <dependency>

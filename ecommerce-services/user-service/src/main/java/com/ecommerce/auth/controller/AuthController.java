@@ -2,7 +2,6 @@ package com.ecommerce.auth.controller;
 
 import com.ecommerce.auth.dto.*;
 import com.ecommerce.auth.service.AuthService;
-import com.ecommerce.common.dto.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

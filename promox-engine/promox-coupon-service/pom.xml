@@ -1,18 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0">
     <modelVersion>4.0.0</modelVersion>
-    <parent>
+    <!--<parent>
         <groupId>com.promox</groupId>
         <artifactId>promox-engine</artifactId>
         <version>1.0.0-SNAPSHOT</version>
+    </parent>-->
+    <parent>
+        <groupId>com.ecommerce</groupId>
+        <artifactId>ecommerce-backend</artifactId>
+        <version>1.0.0</version>
     </parent>
     <artifactId>promox-coupon-service</artifactId>
-    <n>PromoX Coupon Service</n>
+    <name>PromoX Coupon Service</name>
     <dependencies>
-        <dependency>
+        <!--<dependency>
             <groupId>com.promox</groupId>
             <artifactId>promox-common</artifactId>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>

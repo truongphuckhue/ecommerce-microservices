@@ -1,13 +1,16 @@
 package com.ecommerce.auth.service;
 
+import com.ecommerce.auth.common.exception.InvalidTokenException;
 import com.ecommerce.auth.dto.*;
 import com.ecommerce.auth.entity.RefreshToken;
 import com.ecommerce.auth.entity.User;
 import com.ecommerce.auth.repository.RefreshTokenRepository;
 import com.ecommerce.auth.repository.UserRepository;
 import com.ecommerce.auth.util.JwtUtil;
-import com.ecommerce.common.exception.BusinessException;
-import com.ecommerce.common.exception.ResourceNotFoundException;
+import com.ecommerce.auth.common.exception.BusinessException;
+import com.ecommerce.auth.common.exception.ResourceNotFoundException;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -23,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -74,7 +78,7 @@ public class AuthServiceImpl implements AuthService {
                 .failedLoginAttempts(0)
                 .build();
 
-        user = userRepository.save(user);
+        user = userRepository.save(user); // ← Có thể duplicate nếu 2 requests cùng lúc
         log.info("User registered successfully: {}", user.getUsername());
 
         return UserResponse.fromUser(user);
@@ -202,25 +206,57 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public void logout(String token) {
-        log.info("Logout request");
+        log.info("Logout request received");
 
         // Extract token from Bearer scheme
         if (token.startsWith("Bearer ")) {
             token = token.substring(7);
         }
 
-        // Add token to blacklist in Redis
-        String username = jwtUtil.getUsernameFromToken(token);
-        Long expirationTimeInMillis = jwtUtil.getAccessTokenExpirationInMillis();  // ← FIX
+        try {
+            // Validate token format first
+            if (!jwtUtil.validateToken(token)) {
+                log.warn("Invalid token provided for logout");
+                throw new InvalidTokenException("Invalid token");
+            }
 
-        redisTemplate.opsForValue().set(
-                TOKEN_BLACKLIST_PREFIX + token,
-                username,
-                expirationTimeInMillis,
-                TimeUnit.MILLISECONDS  // ← Giờ đúng rồi
-        );
+            // Extract username và expiration từ token
+            String username = jwtUtil.getUsernameFromToken(token);
+            Date expirationDate = jwtUtil.getExpirationDateFromToken(token);
 
-        log.info("User logged out successfully: {}", username);
+            // Tính thời gian còn lại của token (milliseconds)
+            long currentTimeMillis = System.currentTimeMillis();
+            long expirationTimeMillis = expirationDate.getTime();
+            long remainingTimeMillis = expirationTimeMillis - currentTimeMillis;
+
+            // Chỉ blacklist nếu token chưa hết hạn
+            if (remainingTimeMillis > 0) {
+                redisTemplate.opsForValue().set(
+                        TOKEN_BLACKLIST_PREFIX + token,
+                        username,
+                        remainingTimeMillis,
+                        TimeUnit.MILLISECONDS
+                );
+
+                long remainingMinutes = TimeUnit.MILLISECONDS.toMinutes(remainingTimeMillis);
+                log.info("User '{}' logged out successfully. Token blacklisted for {} minutes ({} hours)",
+                        username,
+                        remainingMinutes,
+                        String.format("%.2f", remainingMinutes / 60.0));
+            } else {
+                log.info("User '{}' logged out. Token already expired, skipping blacklist", username);
+            }
+
+        } catch (ExpiredJwtException e) {
+            log.info("Logout attempted with expired token");
+            // Token đã hết hạn, không cần blacklist
+        } catch (JwtException e) {
+            log.error("JWT error during logout: {}", e.getMessage());
+            throw new InvalidTokenException("Invalid token format");
+        } catch (Exception e) {
+            log.error("Unexpected error during logout: {}", e.getMessage(), e);
+            throw new RuntimeException("Logout failed", e);
+        }
     }
 
     @Override
