@@ -59,6 +59,10 @@ app:
     secret-key: ${RECAPTCHA_SECRET_KEY:dev-key}
     score-threshold: 0.5
 
+  security:
+    ip-check:
+      enabled: false
+
 # Logging
 logging:
   level:
