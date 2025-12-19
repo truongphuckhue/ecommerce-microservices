@@ -71,20 +71,28 @@ public class AuthServiceImpl implements AuthService {
         String clientIp = getClientIp();
         String userAgent = getUserAgent();
 
-        rateLimitService.checkRateLimit(
-                "register:ip:" + clientIp,
-                5,      // 5 attempts
-                3600,   // per hour
-                "Too many registration attempts from this IP address"
-        );
+        try {
+            rateLimitService.checkRateLimit(
+                    "register:ip:" + clientIp,
+                    5,      // 5 attempts
+                    3600,   // per hour
+                    "Too many registration attempts from this IP address"
+            );
 
-        // Also rate limit by email
-        rateLimitService.checkRateLimit(
-                "register:email:" + request.getEmail(),
-                3,      // 3 attempts
-                86400,  // per day
-                "Too many registration attempts with this email"
-        );
+            // Also rate limit by email
+            rateLimitService.checkRateLimit(
+                    "register:email:" + request.getEmail(),
+                    3,      // 3 attempts
+                    86400,  // per day
+                    "Too many registration attempts with this email"
+            );
+        } catch (RateLimitExceededException e) {
+            // ← Log rate limit exceeded
+            auditService.logAsync(AuditLog.rateLimitExceeded(
+                    request.getUsername(), "REGISTER", clientIp));
+            throw e;
+        }
+
 
         // STEP 1: Sanitize all inputs FIRST
         String username = inputSanitizer.sanitizeUsername(request.getUsername());
