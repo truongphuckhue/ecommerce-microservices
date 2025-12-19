@@ -4,7 +4,7 @@ import com.ecommerce.auth.dto.*;
 
 public interface AuthService {
     
-    UserResponse register(RegisterRequest request);
+    UserResponse register(RegisterRequest request) throws InterruptedException;
     
     AuthResponse login(LoginRequest request);
     

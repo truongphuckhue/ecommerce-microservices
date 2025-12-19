@@ -34,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -64,12 +65,14 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public UserResponse register(RegisterRequest request) {
+    public UserResponse register(RegisterRequest request) throws InterruptedException {
         log.info("Registering new user: {}", request.getUsername());
 
         // STEP 0: Rate limiting check (FIRST!)
         String clientIp = getClientIp();
         String userAgent = getUserAgent();
+        boolean usernameExists = false;
+        boolean emailExists = false;
 
         try {
             rateLimitService.checkRateLimit(
@@ -108,17 +111,33 @@ public class AuthServiceImpl implements AuthService {
         );
 
         // STEP 3: Check duplicates
-        if (userRepository.existsByUsername(request.getUsername())) {
-            auditService.logAsync(AuditLog.registerFailure(
-                    username, "Username already exists", clientIp, userAgent));
-            throw new BusinessException("USERNAME_EXISTS", "Username already exists");
-        }
+//        if (userRepository.existsByUsername(request.getUsername())) {
+//            auditService.logAsync(AuditLog.registerFailure(
+//                    username, "Username already exists", clientIp, userAgent));
+//            throw new BusinessException("USERNAME_EXISTS", "Username already exists");
+//        }
+//
+//
+//        if (userRepository.existsByEmail(request.getEmail())) {
+//            auditService.logAsync(AuditLog.registerFailure(
+//                    username, "Email already exists", clientIp, userAgent));
+//            throw new BusinessException("EMAIL_EXISTS", "Email already exists");
+//        }
+        usernameExists = userRepository.existsByUsername(username);
+        emailExists = userRepository.existsByEmail(email);
 
-
-        if (userRepository.existsByEmail(request.getEmail())) {
+        if (usernameExists || emailExists) {
+            // ← Generic message to prevent user enumeration
             auditService.logAsync(AuditLog.registerFailure(
-                    username, "Email already exists", clientIp, userAgent));
-            throw new BusinessException("EMAIL_EXISTS", "Email already exists");
+                    username,
+                    usernameExists ? "Username exists" : "Email exists",
+                    clientIp, userAgent));
+
+            // Add small random delay to prevent timing analysis
+            Thread.sleep(100 + new Random().nextInt(50)); // 100-150ms
+
+            throw new BusinessException("REGISTRATION_FAILED",
+                    "Registration failed. Please check your information.");
         }
 
         try{
