@@ -1,7 +1,9 @@
 package com.ecommerce.auth.service;
 
 import com.ecommerce.auth.common.exception.InvalidTokenException;
+import com.ecommerce.auth.common.exception.RateLimitExceededException;
 import com.ecommerce.auth.dto.*;
+import com.ecommerce.auth.entity.AuditLog;
 import com.ecommerce.auth.entity.RefreshToken;
 import com.ecommerce.auth.entity.User;
 import com.ecommerce.auth.repository.RefreshTokenRepository;
@@ -51,6 +53,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordSecurityService passwordSecurityService;
     private final InputSanitizer inputSanitizer;
     private final RateLimitService rateLimitService;
+    private final AuditService auditService;
     private final HttpServletRequest httpRequest;
 
     private final EmailVerificationService verificationService;
@@ -66,6 +69,8 @@ public class AuthServiceImpl implements AuthService {
 
         // STEP 0: Rate limiting check (FIRST!)
         String clientIp = getClientIp();
+        String userAgent = getUserAgent();
+
         rateLimitService.checkRateLimit(
                 "register:ip:" + clientIp,
                 5,      // 5 attempts
@@ -96,11 +101,15 @@ public class AuthServiceImpl implements AuthService {
 
         // STEP 3: Check duplicates
         if (userRepository.existsByUsername(request.getUsername())) {
+            auditService.logAsync(AuditLog.registerFailure(
+                    username, "Username already exists", clientIp, userAgent));
             throw new BusinessException("USERNAME_EXISTS", "Username already exists");
         }
 
 
         if (userRepository.existsByEmail(request.getEmail())) {
+            auditService.logAsync(AuditLog.registerFailure(
+                    username, "Email already exists", clientIp, userAgent));
             throw new BusinessException("EMAIL_EXISTS", "Email already exists");
         }
 
@@ -128,21 +137,30 @@ public class AuthServiceImpl implements AuthService {
             // STEP 5: Send verification email (async)
             verificationService.createAndSendVerificationToken(user);
 
+            // ← Log successful registration
+            auditService.logAsync(AuditLog.registerSuccess(user, clientIp, userAgent));
+
             return UserResponse.fromUser(user);
+        } catch (RateLimitExceededException e) {
+            // ← Log rate limit exceeded
+            auditService.logAsync(AuditLog.rateLimitExceeded(
+                    request.getUsername(), "REGISTER", clientIp));
+            throw e;
         } catch (DataIntegrityViolationException e) {
-            // Database constraint caught the duplicate
-            String message = e.getMessage();
-            if (message != null) {
-                if (message.contains("uk_username")) {
-                    log.warn("Duplicate username caught by database constraint: {}", request.getUsername());
-                    throw new BusinessException("USERNAME_EXISTS", "Username already exists");
-                }
-                if (message.contains("uk_email")) {
-                    log.warn("Duplicate email caught by database constraint: {}", request.getEmail());
-                    throw new BusinessException("EMAIL_EXISTS", "Email already exists");
-                }
-            }
-            throw new BusinessException("DATABASE_ERROR", "Database constraint violation");
+            // ← Log database error
+            auditService.logAsync(AuditLog.registerFailure(
+                    request.getUsername(), "Database constraint violation",
+                    clientIp, userAgent));
+            handleDatabaseConstraintViolation(e, request);
+            throw new BusinessException("DATABASE_ERROR", "Registration failed");
+        } catch (Exception e) {
+            // ← Log unexpected error
+            auditService.logAsync(AuditLog.registerFailure(
+                    request.getUsername(), "Unexpected error: " + e.getMessage(),
+                    clientIp, userAgent));
+            log.error("Unexpected error during registration", e);
+            throw new BusinessException("REGISTRATION_ERROR",
+                    "Registration failed. Please try again.");
         }
 
     }
@@ -366,5 +384,24 @@ public class AuthServiceImpl implements AuthService {
             return xForwardedFor.split(",")[0].trim();
         }
         return httpRequest.getRemoteAddr();
+    }
+
+    private String getUserAgent() {
+        return httpRequest.getHeader("User-Agent");
+    }
+
+    private void handleDatabaseConstraintViolation(
+            DataIntegrityViolationException e, RegisterRequest request) {
+        String message = e.getMessage();
+        if (message != null) {
+            if (message.contains("uk_username")) {
+                log.warn("Duplicate username caught by database: {}", request.getUsername());
+                throw new BusinessException("USERNAME_EXISTS", "Username already exists");
+            }
+            if (message.contains("uk_email")) {
+                log.warn("Duplicate email caught by database: {}", request.getEmail());
+                throw new BusinessException("EMAIL_EXISTS", "Email already exists");
+            }
+        }
     }
 }
