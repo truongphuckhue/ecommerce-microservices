@@ -6,10 +6,13 @@ import com.ecommerce.auth.entity.VerificationToken;
 import com.ecommerce.auth.repository.UserRepository;
 import com.ecommerce.auth.repository.VerificationTokenRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
+
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -124,6 +127,6 @@ public class EmailVerificationService {
     }
 
     private String buildVerificationUrl(String token) {
-        return String.format("%s/auth/verify-email?token=%s", baseUrl, token);
+        return String.format("%s/api/auth/verify-email?token=%s", baseUrl, token);
     }
 }

@@ -1,0 +1,79 @@
+# Application Configuration - Development Profile
+# Copy this file to: src/main/resources/application-dev.yml
+
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  # Email Configuration (DISABLED for local development)
+  mail:
+    host: localhost #smtp.gmail.com
+    port: 1025
+    # No credentials needed when email is disabled
+    username: noreply@mailhog.local
+    password: test
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+            required: false
+    test-connection: false
+
+  # Database (H2 in-memory for dev - optional)
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ecommerce_auth
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  # Redis
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+# Application specific settings
+app:
+  name: E-Commerce Platform (Dev)
+
+  # IMPORTANT: Disable email verification in development
+  verification:
+    token-expiry-hours: 24
+    base-url: http://localhost:8080
+    email-enabled: true
+
+  # IMPORTANT: Disable CAPTCHA in development
+  captcha:
+    enabled: false  # ← DISABLED - No CAPTCHA check in dev
+    secret-key: ${RECAPTCHA_SECRET_KEY:dev-key}
+    score-threshold: 0.5
+
+# Logging
+logging:
+  level:
+    root: INFO
+    com.ecommerce.auth: DEBUG
+    org.springframework.web: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always

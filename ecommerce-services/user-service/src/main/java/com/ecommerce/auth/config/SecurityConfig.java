@@ -40,7 +40,17 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/register", "/auth/login", "/auth/refresh").permitAll()
+                        .requestMatchers(
+                                "/auth/register",
+                                "/auth/login",
+                                "/auth/refresh",
+                                "/auth/refresh-token",
+                                "/auth/verify-email",          // ← ADD THIS!
+                                "/auth/resend-verification",   // ← ADD THIS!
+                                "/actuator/health",
+                                "/actuator/info",
+                                "/actuator/prometheus")
+                        .permitAll()
                         .requestMatchers("/actuator/**").permitAll()
                         .anyRequest().authenticated()
                 )

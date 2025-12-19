@@ -17,7 +17,7 @@ import java.util.Set;
         indexes = {
             @Index(name = "idx_username", columnList = "username"),
             @Index(name = "idx_email", columnList = "email"),
-            @Index(name = "idx_email_verification_token", columnList = "emailVerificationToken"),
+            //@Index(name = "idx_email_verification_token", columnList = "emailVerificationToken"),
             @Index(name = "idx_created_at", columnList = "createdAt"),
             @Index(name = "idx_last_login", columnList = "lastLogin")
         },
