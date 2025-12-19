@@ -53,6 +53,8 @@ public class AuthServiceImpl implements AuthService {
     private final RateLimitService rateLimitService;
     private final HttpServletRequest httpRequest;
 
+    private final EmailVerificationService verificationService;
+
     private static final String TOKEN_BLACKLIST_PREFIX = "blacklist:";
     private static final int MAX_FAILED_ATTEMPTS = 5;
     private static final int LOCK_DURATION_MINUTES = 30;
@@ -111,7 +113,8 @@ public class AuthServiceImpl implements AuthService {
                     .firstName(firstName)
                     .lastName(lastName)
                     .phoneNumber(request.getPhoneNumber())
-                    .enabled(true)
+                    .enabled(false) //Disabled until email verified
+                    .emailVerified(false)
                     .accountNonExpired(true)
                     .accountNonLocked(true)
                     .credentialsNonExpired(true)
@@ -121,6 +124,9 @@ public class AuthServiceImpl implements AuthService {
 
             user = userRepository.save(user); // ← Có thể duplicate nếu 2 requests cùng lúc -> đẩyvaofo trycatch
             log.info("User registered successfully: {}", user.getUsername());
+
+            // STEP 5: Send verification email (async)
+            verificationService.createAndSendVerificationToken(user);
 
             return UserResponse.fromUser(user);
         } catch (DataIntegrityViolationException e) {

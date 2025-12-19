@@ -92,6 +92,13 @@ public class User {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    @Column(name = "email_verified", nullable = false)
+    @Builder.Default
+    private Boolean emailVerified = false;
+
+    @Column(name = "email_verified_at")
+    private LocalDateTime emailVerifiedAt;
+
     // Helper methods
     public void addRole(String role) {
         this.roles.add(role);

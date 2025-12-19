@@ -2,6 +2,7 @@ package com.ecommerce.auth.controller;
 
 import com.ecommerce.auth.dto.*;
 import com.ecommerce.auth.service.AuthService;
+import com.ecommerce.auth.service.EmailVerificationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final EmailVerificationService verificationService;
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<UserResponse>> register(@Valid @RequestBody RegisterRequest request) {
@@ -28,6 +30,30 @@ public class AuthController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.success("User registered successfully", response));
+    }
+
+    @GetMapping("/verify-email")
+    public ResponseEntity<ApiResponse<Void>> verifyEmail(
+            @RequestParam String token) {
+        log.info("GET /auth/verify-email - Verify email token");
+
+        verificationService.verifyEmail(token);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("Email verified successfully! You can now login.")
+        );
+    }
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<ApiResponse<Void>> resendVerification(
+            @RequestParam String email) {
+        log.info("POST /auth/resend-verification - Resend verification email: {}", email);
+
+        verificationService.resendVerificationEmail(email);
+
+        return ResponseEntity.ok(
+                ApiResponse.success("Verification email sent! Please check your inbox.")
+        );
     }
 
     @PostMapping("/login")
