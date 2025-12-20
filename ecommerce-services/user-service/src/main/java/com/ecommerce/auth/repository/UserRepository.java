@@ -16,10 +16,25 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUsername(String username);
     
     Optional<User> findByEmail(String email);
+
     
     boolean existsByUsername(String username);
     
     boolean existsByEmail(String email);
+
+    @Query("SELECT CASE " +
+            "WHEN (SELECT COUNT(u) FROM User u WHERE u.username = :username) > 0 " +
+            "     AND (SELECT COUNT(u) FROM User u WHERE u.email = :email) > 0 " +
+            "     THEN 'both' " +
+            "WHEN (SELECT COUNT(u) FROM User u WHERE u.username = :username) > 0 " +
+            "     THEN 'username' " +
+            "WHEN (SELECT COUNT(u) FROM User u WHERE u.email = :email) > 0 " +
+            "     THEN 'email' " +
+            "ELSE null END")
+    String findExistingField(
+            @Param("username") String username,
+            @Param("email") String email
+    );
 
     @Modifying
     @Query("UPDATE User u SET u.lastLogin = :loginTime WHERE u.id = :userId")

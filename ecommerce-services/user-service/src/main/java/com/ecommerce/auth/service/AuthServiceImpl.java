@@ -6,6 +6,7 @@ import com.ecommerce.auth.dto.*;
 import com.ecommerce.auth.entity.AuditLog;
 import com.ecommerce.auth.entity.RefreshToken;
 import com.ecommerce.auth.entity.User;
+import com.ecommerce.auth.event.UserRegisteredEvent;
 import com.ecommerce.auth.repository.RefreshTokenRepository;
 import com.ecommerce.auth.repository.UserRepository;
 import com.ecommerce.auth.security.InputSanitizer;
@@ -19,6 +20,7 @@ import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -56,6 +58,7 @@ public class AuthServiceImpl implements AuthService {
     private final RateLimitService rateLimitService;
     private final AuditService auditService;
     private final HttpServletRequest httpRequest;
+    private final ApplicationEventPublisher eventPublisher;
 
     private final EmailVerificationService verificationService;
 
@@ -71,8 +74,6 @@ public class AuthServiceImpl implements AuthService {
         // STEP 0: Rate limiting check (FIRST!)
         String clientIp = getClientIp();
         String userAgent = getUserAgent();
-        boolean usernameExists = false;
-        boolean emailExists = false;
 
         try {
             rateLimitService.checkRateLimit(
@@ -111,30 +112,19 @@ public class AuthServiceImpl implements AuthService {
         );
 
         // STEP 3: Check duplicates
-//        if (userRepository.existsByUsername(request.getUsername())) {
-//            auditService.logAsync(AuditLog.registerFailure(
-//                    username, "Username already exists", clientIp, userAgent));
-//            throw new BusinessException("USERNAME_EXISTS", "Username already exists");
-//        }
-//
-//
-//        if (userRepository.existsByEmail(request.getEmail())) {
-//            auditService.logAsync(AuditLog.registerFailure(
-//                    username, "Email already exists", clientIp, userAgent));
-//            throw new BusinessException("EMAIL_EXISTS", "Email already exists");
-//        }
-        usernameExists = userRepository.existsByUsername(username);
-        emailExists = userRepository.existsByEmail(email);
 
-        if (usernameExists || emailExists) {
-            // ← Generic message to prevent user enumeration
+        String existingField = userRepository.findExistingField(username, email);
+
+        if (existingField != null) {
+            String errorMessage = switch (existingField) {
+                case "username" -> "Username already exists";
+                case "email" -> "Email already exists";
+                case "both" -> "Username and email already exist";
+                default -> "Registration failed";
+            };
+
             auditService.logAsync(AuditLog.registerFailure(
-                    username,
-                    usernameExists ? "Username exists" : "Email exists",
-                    clientIp, userAgent));
-
-            // Add small random delay to prevent timing analysis
-            Thread.sleep(100 + new Random().nextInt(50)); // 100-150ms
+                    username, errorMessage, clientIp, userAgent));
 
             throw new BusinessException("REGISTRATION_FAILED",
                     "Registration failed. Please check your information.");
@@ -158,30 +148,28 @@ public class AuthServiceImpl implements AuthService {
                     .failedLoginAttempts(0)
                     .build();
 
-            user = userRepository.save(user); // ← Có thể duplicate nếu 2 requests cùng lúc -> đẩyvaofo trycatch
+            user = userRepository.save(user);
             log.info("User registered successfully: {}", user.getUsername());
 
             // STEP 5: Send verification email (async)
-            verificationService.createAndSendVerificationToken(user);
+            eventPublisher.publishEvent(new UserRegisteredEvent(
+                    this, user, clientIp, userAgent));
 
-            // ← Log successful registration
-            auditService.logAsync(AuditLog.registerSuccess(user, clientIp, userAgent));
+            auditService.logAsync(AuditLog.registerSuccess(
+                    user, clientIp, userAgent));
 
             return UserResponse.fromUser(user);
         } catch (RateLimitExceededException e) {
-            // ← Log rate limit exceeded
             auditService.logAsync(AuditLog.rateLimitExceeded(
                     request.getUsername(), "REGISTER", clientIp));
             throw e;
         } catch (DataIntegrityViolationException e) {
-            // ← Log database error
             auditService.logAsync(AuditLog.registerFailure(
                     request.getUsername(), "Database constraint violation",
                     clientIp, userAgent));
             handleDatabaseConstraintViolation(e, request);
             throw new BusinessException("DATABASE_ERROR", "Registration failed");
         } catch (Exception e) {
-            // ← Log unexpected error
             auditService.logAsync(AuditLog.registerFailure(
                     request.getUsername(), "Unexpected error: " + e.getMessage(),
                     clientIp, userAgent));
