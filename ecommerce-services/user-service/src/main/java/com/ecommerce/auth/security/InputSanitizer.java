@@ -41,15 +41,7 @@ public class InputSanitizer {
      * Already validated by regex, but still clean HTML
      */
     public String sanitizeUsername(String username) {
-        if (username == null || username.isBlank()) {
-            return username;
-        }
-
-        // Remove HTML and convert to lowercase
-        String cleaned = Jsoup.clean(username, Safelist.none());
-        cleaned = cleaned.toLowerCase().trim();
-
-        return cleaned;
+        return sanitize(username);
     }
 
     /**
@@ -57,14 +49,21 @@ public class InputSanitizer {
      * Already validated by @Email, but still clean HTML
      */
     public String sanitizeEmail(String email) {
-        if (email == null || email.isBlank()) {
-            return email;
+        return sanitize(email);
+    }
+
+    public String sanitizeUsernameOrEmail(String input) {
+        return sanitize(input);
+    }
+
+    private String sanitize(String input) {
+        if (input == null || input.isBlank()) {
+            return input;
         }
 
-        // Remove HTML and convert to lowercase
-        String cleaned = Jsoup.clean(email, Safelist.none());
-        cleaned = cleaned.toLowerCase().trim();
-
-        return cleaned;
+        return Jsoup.clean(input, Safelist.none())
+                .toLowerCase()
+                .trim();
     }
+
 }

@@ -1,4 +1,4 @@
-package com.ecommerce.auth.security;
+package com.ecommerce.auth.service;
 
 import com.ecommerce.auth.common.exception.RateLimitExceededException;
 import lombok.RequiredArgsConstructor;

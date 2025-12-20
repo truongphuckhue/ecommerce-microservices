@@ -22,7 +22,7 @@ public class AuthController {
     private final EmailVerificationService verificationService;
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<UserResponse>> register(@Valid @RequestBody RegisterRequest request) {
+    public ResponseEntity<ApiResponse<UserResponse>> register(@Valid @RequestBody RegisterRequest request) throws InterruptedException {
         log.info("POST /auth/register - Register new user: {}", request.getUsername());
         
         UserResponse response = authService.register(request);

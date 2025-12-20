@@ -92,4 +92,45 @@ public class AuditLog {
                 .ipAddress(ipAddress)
                 .build();
     }
+
+    public static AuditLog accountLocked(
+            String username,
+            String ipAddress,
+            String userAgent
+    ) {
+        return AuditLog.builder()
+                .username(username != null ? username : "unknown")
+                .action("ACCOUNT_LOCKED")
+                .status("LOCKED")
+                .details("Account locked due to multiple failed login attempts")
+                .errorCode("ACCOUNT_LOCKED")
+                .ipAddress(ipAddress)
+                .build();
+    }
+
+    public static AuditLog loginFailure(
+            String username, String reason,
+            String ipAddress, String userAgent
+    ) {
+        return AuditLog.builder()
+                .username(username != null ? username : "unknown")
+                .action("LOGIN")
+                .status("FAILURE")
+                .details("Login failed: " + reason)
+                .errorCode("LOGIN_FAILED")
+                .ipAddress(ipAddress)
+                .userAgent(userAgent)
+                .build();
+    }
+    public static AuditLog loginSuccess(User user, String ipAddress, String userAgent) {
+        return AuditLog.builder()
+                .userId(user.getId())
+                .username(user.getUsername())
+                .action("LOGIN")
+                .status("SUCCESS")
+                .details("User Login successfully")
+                .ipAddress(ipAddress)
+                .userAgent(userAgent)
+                .build();
+    }
 }

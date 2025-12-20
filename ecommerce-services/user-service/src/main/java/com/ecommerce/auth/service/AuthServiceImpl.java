@@ -11,7 +11,6 @@ import com.ecommerce.auth.repository.RefreshTokenRepository;
 import com.ecommerce.auth.repository.UserRepository;
 import com.ecommerce.auth.security.InputSanitizer;
 import com.ecommerce.auth.security.PasswordSecurityService;
-import com.ecommerce.auth.security.RateLimitService;
 import com.ecommerce.auth.util.JwtUtil;
 import com.ecommerce.auth.common.exception.BusinessException;
 import com.ecommerce.auth.common.exception.ResourceNotFoundException;
@@ -36,7 +35,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Date;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -183,16 +181,53 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public AuthResponse login(LoginRequest request) {
-        log.info("User login attempt: {}", request.getUsernameOrEmail());
+
+        // STEP 0: Rate limiting check (BEFORE anything else)
+        String clientIp = getClientIp();
+        String userAgent = getUserAgent();
+
+        // STEP 1: Sanitize inputs FIRST
+        String sanitizedIdentifier = inputSanitizer.sanitizeUsernameOrEmail(
+                request.getUsernameOrEmail()
+        );
+
+        try {
+            // IP-based rate limiting: 10 attempts per hour
+            rateLimitService.checkRateLimit(
+                    "login:ip:" + clientIp,
+                    10,
+                    3600,
+                    "Too many login attempts from this IP address"
+            );
+
+            // User-based rate limiting: 5 attempts per 15 minutes
+            rateLimitService.checkRateLimit(
+                    "login:user:" + sanitizedIdentifier,
+                    5,
+                    900,
+                    "Too many login attempts for this account"
+            );
+
+        } catch (RateLimitExceededException e) {
+            // Log security event
+            auditService.logAsync(AuditLog.rateLimitExceeded(
+                    sanitizedIdentifier, "LOGIN", clientIp));
+            throw e;
+        }
+
+        log.info("User login attempt - identifier length: {}",
+                sanitizedIdentifier.length());
 
         // Find user
-        User user = userRepository.findByUsername(request.getUsernameOrEmail())
-                .orElseGet(() -> userRepository.findByEmail(request.getUsernameOrEmail())
-                        .orElseThrow(() -> new BadCredentialsException("Invalid username/email or password")));
+        User user = userRepository.findByUsernameOrEmail(sanitizedIdentifier)
+                .orElseThrow(() -> new BusinessException(
+                        "AUTHENTICATION_FAILED",
+                        "Invalid username/email or password"  // Generic message
+                ));
 
         // Check if account is locked
         if (user.isAccountLocked()) {
-            log.warn("Account is locked: {}", user.getUsername());
+            auditService.logAsync(AuditLog.accountLocked(sanitizedIdentifier, clientIp, userAgent));
             throw new LockedException("Account is locked until " + user.getLockedUntil());
         }
 
@@ -210,6 +245,9 @@ public class AuthServiceImpl implements AuthService {
             user.setLastLogin(LocalDateTime.now());
             userRepository.save(user);
 
+            auditService.logAsync(AuditLog.loginSuccess(user, clientIp, userAgent));
+            rateLimitService.resetRateLimit("login:user:" + sanitizedIdentifier);
+
             // Generate tokens
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             String accessToken = jwtUtil.generateToken(userDetails.getUsername());
@@ -217,6 +255,8 @@ public class AuthServiceImpl implements AuthService {
 
             // Save refresh token to database
             saveRefreshToken(user, refreshToken);
+
+            userRepository.updateLoginSuccess(user.getId(), LocalDateTime.now());
 
             log.info("User logged in successfully: {}", user.getUsername());
 
@@ -236,10 +276,20 @@ public class AuthServiceImpl implements AuthService {
                     .build();
 
         } catch (BadCredentialsException e) {
+
+            auditService.logAsync(AuditLog.loginFailure(
+                    sanitizedIdentifier, "Invalid credentials", clientIp, userAgent
+            ));
+
             // Increment failed login attempts
             user.incrementFailedLoginAttempts();
             
             if (user.getFailedLoginAttempts() >= MAX_FAILED_ATTEMPTS) {
+
+                auditService.logAsync(AuditLog.accountLocked(
+                        sanitizedIdentifier, clientIp, userAgent
+                ));
+
                 user.lockAccount(LOCK_DURATION_MINUTES);
                 userRepository.save(user);
                 log.warn("Account locked due to failed login attempts: {}", user.getUsername());
@@ -247,7 +297,7 @@ public class AuthServiceImpl implements AuthService {
             }
             
             userRepository.save(user);
-            log.warn("Failed login attempt for user: {}", user.getUsername());
+            auditService.logAsync(AuditLog.loginFailure(user.getUsername(), "Failed login attempt", clientIp, userAgent ));
             throw new BadCredentialsException("Invalid username/email or password");
         }
     }

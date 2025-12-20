@@ -17,6 +17,34 @@ public interface UserRepository extends JpaRepository<User, Long> {
     
     Optional<User> findByEmail(String email);
 
+    @Query("""
+        SELECT u FROM User u 
+        LEFT JOIN FETCH u.roles 
+        WHERE LOWER(u.username) = LOWER(:identifier) 
+           OR LOWER(u.email) = LOWER(:identifier)
+        """)
+    Optional<User> findByUsernameOrEmail(@Param("identifier") String identifier);
+
+    @Modifying
+    @Query("""
+        UPDATE User u 
+        SET u.lastLogin = :loginTime, 
+            u.failedLoginAttempts = 0,
+            u.lockedUntil = null
+        WHERE u.id = :userId
+        """)
+    void updateLoginSuccess(
+            @Param("userId") Long userId,
+            @Param("loginTime") LocalDateTime loginTime
+    );
+
+    @Modifying
+    @Query("""
+        UPDATE User u 
+        SET u.failedLoginAttempts = u.failedLoginAttempts + 1 
+        WHERE u.id = :userId
+        """)
+    void incrementFailedAttempts(@Param("userId") Long userId);
     
     boolean existsByUsername(String username);
     

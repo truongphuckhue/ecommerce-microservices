@@ -1,6 +1,7 @@
 package com.ecommerce.auth.security;
 
 import com.ecommerce.auth.common.exception.RateLimitExceededException;
+import com.ecommerce.auth.service.RateLimitService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
