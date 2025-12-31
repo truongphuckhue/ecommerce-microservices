@@ -54,7 +54,7 @@ public class PasswordSecurityService {
 
         // 4. Check entropy (randomness)
         double entropy = calculateEntropy(password);
-        if (entropy < 50) {
+        if (entropy < 30) {
             throw new BusinessException("WEAK_PASSWORD",
                     String.format("Password is not strong enough (entropy: %.2f). Use a mix of different character types.", entropy));
         }

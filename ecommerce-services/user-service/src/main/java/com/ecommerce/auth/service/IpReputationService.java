@@ -14,7 +14,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class IpReputationService {
-    private final RestTemplate restTemplate;
+    //private final RestTemplate restTemplate;
     private final AuditService auditService;
 
     @Value("${app.security.ip-check.enabled:false}")
