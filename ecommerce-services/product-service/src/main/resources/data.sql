@@ -1,0 +1,97 @@
+DELETE FROM product_images;
+DELETE FROM products;
+DELETE FROM categories;
+
+ALTER SEQUENCE categories_id_seq RESTART WITH 1;
+ALTER SEQUENCE products_id_seq RESTART WITH 1;
+
+INSERT INTO categories (id, name, slug, description, parent_id, image_url, active, display_order, created_at, updated_at) VALUES
+(1, 'Electronics', 'electronics', 'Electronic devices and gadgets', NULL, 'https://images.unsplash.com/photo-1498049794561-7780e7231661', true, 1, NOW(), NOW()),
+(2, 'Computers', 'computers', 'Laptops, desktops, and accessories', 1, 'https://images.unsplash.com/photo-1587831990711-23ca6441447b', true, 1, NOW(), NOW()),
+(3, 'Mobile Phones', 'mobile-phones', 'Smartphones and accessories', 1, 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9', true, 2, NOW(), NOW()),
+(4, 'Audio', 'audio', 'Headphones, speakers, and audio equipment', 1, 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e', true, 3, NOW(), NOW()),
+(5, 'Fashion', 'fashion', 'Clothing and accessories', NULL, 'https://images.unsplash.com/photo-1445205170230-053b83016050', true, 2, NOW(), NOW()),
+(6, 'Men Clothing', 'men-clothing', 'Mens fashion and apparel', 5, 'https://images.unsplash.com/photo-1490114538077-0a7f8cb49891', true, 1, NOW(), NOW()),
+(7, 'Women Clothing', 'women-clothing', 'Womens fashion and apparel', 5, 'https://images.unsplash.com/photo-1483985988355-763728e1935b', true, 2, NOW(), NOW()),
+(8, 'Home & Garden', 'home-garden', 'Home decoration and garden supplies', NULL, 'https://images.unsplash.com/photo-1484101403633-562f891dc89a', true, 3, NOW(), NOW()),
+(9, 'Sports', 'sports', 'Sports equipment and accessories', NULL, 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211', true, 4, NOW(), NOW()),
+(10, 'Books', 'books', 'Books and reading materials', NULL, 'https://images.unsplash.com/photo-1512820790803-83ca734da794', true, 5, NOW(), NOW());
+
+INSERT INTO products (id, name, sku, description, price, discount_price, category_id, active, stock_quantity, brand, weight, dimensions, view_count, sold_count, average_rating, review_count, featured, created_at, updated_at) VALUES
+(1, 'MacBook Pro 16 inch M3 Max', 'MBP-16-M3MAX-001', 'Apple MacBook Pro 16-inch with M3 Max chip, 36GB RAM, 1TB SSD', 3499.99, 3299.99, 2, true, 25, 'Apple', 2.15, '35.79x24.81x1.68 cm', 1250, 89, 4.8, 156, true, NOW() - INTERVAL '45 days', NOW()),
+(2, 'Dell XPS 15', 'DELL-XPS15-001', 'Dell XPS 15 with Intel i9, 32GB RAM, 1TB SSD, RTX 4060', 2299.99, NULL, 2, true, 40, 'Dell', 1.92, '34.45x23.02x1.8 cm', 890, 67, 4.6, 98, true, NOW() - INTERVAL '30 days', NOW()),
+(3, 'iPhone 15 Pro Max', 'IP15-PROMAX-256', 'Apple iPhone 15 Pro Max 256GB, Titanium Blue', 1199.99, 1099.99, 3, true, 150, 'Apple', 0.221, '15.9x7.67x0.83 cm', 2340, 234, 4.9, 412, true, NOW() - INTERVAL '20 days', NOW()),
+(4, 'Samsung Galaxy S24 Ultra', 'SGS24-ULTRA-512', 'Samsung Galaxy S24 Ultra 512GB, AI Camera, S Pen included', 1299.99, 1199.99, 3, true, 120, 'Samsung', 0.232, '16.26x7.9x0.88 cm', 1890, 178, 4.7, 289, true, NOW() - INTERVAL '15 days', NOW()),
+(5, 'Sony WH-1000XM5', 'SONY-WH1000XM5-BLK', 'Sony WH-1000XM5 Wireless Noise Cancelling Headphones, Black', 399.99, 349.99, 4, true, 200, 'Sony', 0.25, '25.4x21.8x7.6 cm', 3450, 456, 4.8, 678, true, NOW() - INTERVAL '60 days', NOW()),
+(6, 'AirPods Pro 2nd Gen', 'AIRPODS-PRO2-001', 'Apple AirPods Pro 2nd generation with MagSafe charging', 249.99, 229.99, 4, true, 300, 'Apple', 0.05, '4.5x6.1x2.1 cm', 4560, 789, 4.9, 1023, true, NOW() - INTERVAL '50 days', NOW()),
+(7, 'Logitech MX Master 3S', 'LOGI-MXMASTER3S', 'Logitech MX Master 3S Wireless Mouse, Quiet Clicks', 99.99, NULL, 2, true, 180, 'Logitech', 0.141, '12.48x8.44x5.1 cm', 2340, 345, 4.7, 456, false, NOW() - INTERVAL '40 days', NOW()),
+(8, 'Mechanical Keyboard RGB', 'MECH-KB-RGB-001', 'Gaming Mechanical Keyboard with RGB Backlight, Brown Switches', 129.99, 99.99, 2, true, 95, 'Corsair', 1.2, '44x13x3.5 cm', 1230, 189, 4.6, 234, false, NOW() - INTERVAL '35 days', NOW()),
+(9, 'LG 27 4K Monitor', 'LG-27UK850-W', 'LG 27-inch 4K UHD IPS Monitor with USB-C', 449.99, 399.99, 2, true, 60, 'LG', 6.9, '61.3x46.5x23 cm', 890, 123, 4.5, 167, true, NOW() - INTERVAL '25 days', NOW()),
+(10, 'Samsung 32 Curved Monitor', 'SAM-32-CURVE-001', 'Samsung 32-inch Curved Gaming Monitor 144Hz', 349.99, NULL, 2, true, 75, 'Samsung', 7.5, '71.3x53.5x25 cm', 1120, 145, 4.6, 198, false, NOW() - INTERVAL '30 days', NOW()),
+(11, 'Mens Casual Shirt', 'MENS-SHIRT-BLU-001', 'Premium cotton casual shirt for men, Blue', 49.99, 39.99, 6, true, 250, 'H&M', 0.2, '40x30x2 cm', 560, 234, 4.4, 156, false, NOW() - INTERVAL '10 days', NOW()),
+(12, 'Mens Denim Jeans', 'MENS-JEANS-001', 'Classic fit denim jeans, Dark blue wash', 69.99, 54.99, 6, true, 300, 'Levis', 0.6, '35x30x5 cm', 890, 345, 4.5, 289, false, NOW() - INTERVAL '12 days', NOW()),
+(13, 'Womens Summer Dress', 'WOM-DRESS-FLO-001', 'Floral print summer dress, Cotton blend', 59.99, 44.99, 7, true, 180, 'Zara', 0.25, '40x35x3 cm', 1230, 267, 4.6, 234, true, NOW() - INTERVAL '8 days', NOW()),
+(14, 'Womens Leather Handbag', 'WOM-BAG-LTH-001', 'Genuine leather handbag, Multiple compartments', 129.99, 99.99, 7, true, 85, 'Michael Kors', 0.8, '35x28x12 cm', 2340, 178, 4.8, 345, true, NOW() - INTERVAL '20 days', NOW()),
+(15, 'Running Shoes', 'RUN-SHOES-001', 'Professional running shoes with air cushion technology', 119.99, 89.99, 9, true, 220, 'Nike', 0.35, '30x20x12 cm', 3450, 567, 4.7, 678, true, NOW() - INTERVAL '18 days', NOW()),
+(16, 'Yoga Mat Premium', 'YOGA-MAT-PREM-001', 'Premium non-slip yoga mat 6mm thickness', 39.99, 29.99, 9, true, 400, 'Manduka', 1.2, '180x60x0.6 cm', 1890, 456, 4.5, 389, false, NOW() - INTERVAL '15 days', NOW()),
+(17, 'Smart Watch Pro', 'SMART-WATCH-PRO-001', 'Fitness tracker smart watch with heart rate monitor', 199.99, 169.99, 1, true, 180, 'Garmin', 0.05, '4.5x4.5x1.2 cm', 2780, 345, 4.6, 456, true, NOW() - INTERVAL '22 days', NOW()),
+(18, 'Tablet 11 inch', 'TABLET-11-001', 'Android tablet 11 inch with stylus support', 449.99, NULL, 1, true, 95, 'Samsung', 0.498, '25.3x16.5x0.63 cm', 1120, 123, 4.5, 178, false, NOW() - INTERVAL '28 days', NOW()),
+(19, 'Wireless Charger', 'WIRELESS-CHG-001', '15W Fast wireless charging pad, Qi certified', 29.99, 24.99, 1, true, 500, 'Anker', 0.15, '10x10x1 cm', 4560, 1234, 4.4, 890, false, NOW() - INTERVAL '40 days', NOW()),
+(20, 'USB-C Hub 7-in-1', 'USBC-HUB-7IN1', '7-in-1 USB-C hub with HDMI, USB 3.0, SD card reader', 49.99, 39.99, 2, true, 280, 'Anker', 0.08, '12x4x1.5 cm', 2340, 567, 4.6, 456, false, NOW() - INTERVAL '32 days', NOW()),
+(21, 'Coffee Maker', 'COFFEE-MAKER-001', 'Programmable drip coffee maker 12 cups', 89.99, 69.99, 8, true, 120, 'Cuisinart', 3.2, '22x18x35 cm', 1230, 234, 4.5, 289, false, NOW() - INTERVAL '25 days', NOW()),
+(22, 'Air Purifier', 'AIR-PURIFIER-001', 'HEPA air purifier for large rooms up to 500 sq ft', 199.99, 179.99, 8, true, 85, 'Dyson', 5.8, '35x25x60 cm', 890, 123, 4.7, 178, true, NOW() - INTERVAL '30 days', NOW()),
+(23, 'LED Desk Lamp', 'LED-DESK-LAMP-001', 'Adjustable LED desk lamp with USB charging port', 39.99, 29.99, 8, true, 250, 'TaoTronics', 0.6, '40x15x8 cm', 1560, 345, 4.4, 234, false, NOW() - INTERVAL '20 days', NOW()),
+(24, 'Fiction Novel Bestseller', 'BOOK-FICTION-001', 'Latest bestselling fiction novel, Hardcover', 24.99, 19.99, 10, true, 150, 'Penguin', 0.8, '23x15x3 cm', 670, 178, 4.8, 234, false, NOW() - INTERVAL '10 days', NOW()),
+(25, 'Programming Guide Python', 'BOOK-PROG-PY-001', 'Complete Python programming guide for beginners', 49.99, NULL, 10, true, 200, 'OReilly', 1.2, '24x18x3.5 cm', 2340, 456, 4.9, 567, true, NOW() - INTERVAL '35 days', NOW()),
+(26, 'Bluetooth Speaker', 'BT-SPEAKER-001', 'Portable Bluetooth speaker waterproof 20W', 79.99, 59.99, 4, true, 300, 'JBL', 0.54, '18x7x7 cm', 3450, 678, 4.6, 789, false, NOW() - INTERVAL '28 days', NOW()),
+(27, 'Gaming Headset', 'GAME-HEADSET-001', '7.1 Surround sound gaming headset with mic', 89.99, 69.99, 4, true, 180, 'SteelSeries', 0.32, '20x18x10 cm', 2780, 456, 4.5, 567, false, NOW() - INTERVAL '22 days', NOW()),
+(28, 'External SSD 1TB', 'EXT-SSD-1TB-001', 'Portable external SSD 1TB USB 3.2 Gen 2', 129.99, 109.99, 2, true, 150, 'Samsung', 0.05, '8.5x5.7x0.8 cm', 1890, 345, 4.7, 456, false, NOW() - INTERVAL '25 days', NOW()),
+(29, 'Webcam 4K', 'WEBCAM-4K-001', '4K webcam with auto-focus and dual microphones', 149.99, 129.99, 2, true, 95, 'Logitech', 0.18, '9.5x7x5 cm', 1120, 178, 4.6, 234, false, NOW() - INTERVAL '18 days', NOW()),
+(30, 'Smart LED Bulb', 'SMART-BULB-RGB-001', 'WiFi smart LED bulb RGB color changing', 19.99, 14.99, 8, true, 600, 'Philips Hue', 0.08, '12x6x6 cm', 5670, 2345, 4.4, 1234, false, NOW() - INTERVAL '45 days', NOW());
+
+INSERT INTO product_images (product_id, image_url) VALUES
+(1, 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8'),
+(1, 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853'),
+(2, 'https://images.unsplash.com/photo-1593642632823-8f785ba67e45'),
+(2, 'https://images.unsplash.com/photo-1588872657578-7efd1f1555ed'),
+(3, 'https://images.unsplash.com/photo-1592286927505-b6cbe1fda4e5'),
+(3, 'https://images.unsplash.com/photo-1603791239531-1f0e6b4c7e51'),
+(4, 'https://images.unsplash.com/photo-1610945415295-d9bbf067e59c'),
+(4, 'https://images.unsplash.com/photo-1598327105666-5b89351aff97'),
+(5, 'https://images.unsplash.com/photo-1546435770-a3e426bf472b'),
+(5, 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e'),
+(6, 'https://images.unsplash.com/photo-1606841837239-c5a1a4a07af7'),
+(6, 'https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb'),
+(7, 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46'),
+(7, 'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7'),
+(8, 'https://images.unsplash.com/photo-1587829741301-dc798b83add3'),
+(8, 'https://images.unsplash.com/photo-1511512578047-dfb367046420'),
+(9, 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf'),
+(9, 'https://images.unsplash.com/photo-1593640408182-31c70c8268f5'),
+(10, 'https://images.unsplash.com/photo-1563191911-e65f8655ebf9'),
+(10, 'https://images.unsplash.com/photo-1585792180666-f7347c490ee2'),
+(11, 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c'),
+(12, 'https://images.unsplash.com/photo-1542272604-787c3835535d'),
+(13, 'https://images.unsplash.com/photo-1595777457583-95e059d581b8'),
+(14, 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa'),
+(15, 'https://images.unsplash.com/photo-1542291026-7eec264c27ff'),
+(15, 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa'),
+(16, 'https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f'),
+(17, 'https://images.unsplash.com/photo-1523275335684-37898b6baf30'),
+(17, 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a'),
+(18, 'https://images.unsplash.com/photo-1585790050230-5dd28404f10a'),
+(19, 'https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5'),
+(20, 'https://images.unsplash.com/photo-1625948515291-69613efd103f'),
+(21, 'https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6'),
+(22, 'https://images.unsplash.com/photo-1585771724684-38269d6639fd'),
+(23, 'https://images.unsplash.com/photo-1513506003901-1e6a229e2d15'),
+(24, 'https://images.unsplash.com/photo-1544947950-fa07a98d237f'),
+(25, 'https://images.unsplash.com/photo-1532012197267-da84d127e765'),
+(26, 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1'),
+(27, 'https://images.unsplash.com/photo-1599669454699-248893623440'),
+(28, 'https://images.unsplash.com/photo-1597872200969-2b65d56bd16b'),
+(29, 'https://images.unsplash.com/photo-1587825140708-dfaf72ae4b04'),
+(30, 'https://images.unsplash.com/photo-1550985616-10810253b84d');
+
+SELECT setval('categories_id_seq', (SELECT MAX(id) FROM categories));
+SELECT setval('products_id_seq', (SELECT MAX(id) FROM products));

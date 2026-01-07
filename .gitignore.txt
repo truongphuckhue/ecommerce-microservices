@@ -1,0 +1,11 @@
+# Build backend
+**/target/
+**/*.class
+
+# Build frontend
+ecommerce-frontend/dist/
+ecommerce-frontend/node_modules/
+
+# IDE
+.idea/
+*.iml

@@ -1,0 +1,161 @@
+<app-navbar></app-navbar>
+
+<div class="product-list-container">
+  <!-- Featured Products Section -->
+  @if (featuredProducts.length > 0) {
+    <section class="featured-section">
+      <h2 class="section-title">
+        <mat-icon>star</mat-icon>
+        Featured Products
+      </h2>
+      <div class="featured-grid">
+        @for (product of featuredProducts; track product.id) {
+          <app-product-card [product]="product"></app-product-card>
+        }
+      </div>
+    </section>
+  }
+
+  <!-- Main Products Section -->
+  <section class="main-section">
+    <div class="section-header">
+      <h2 class="section-title">
+        <mat-icon>store</mat-icon>
+        All Products
+      </h2>
+      <div class="results-count">
+        {{ totalElements }} products found
+      </div>
+    </div>
+
+    <!-- Filters Bar -->
+    <div class="filters-bar">
+      <!-- Search -->
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search products</mat-label>
+        <input 
+          matInput 
+          [(ngModel)]="searchKeyword"
+          (keyup.enter)="onSearch()"
+          placeholder="Search by name or description"
+        >
+        <mat-icon matPrefix>search</mat-icon>
+        @if (searchKeyword) {
+          <button 
+            mat-icon-button 
+            matSuffix 
+            (click)="searchKeyword = ''; onSearch()"
+          >
+            <mat-icon>clear</mat-icon>
+          </button>
+        }
+      </mat-form-field>
+
+      <!-- Brand Filter -->
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Brand</mat-label>
+        <mat-select 
+          [(ngModel)]="selectedBrand"
+          (selectionChange)="onFilterChange()"
+        >
+          <mat-option [value]="null">All Brands</mat-option>
+          @for (brand of brands; track brand) {
+            <mat-option [value]="brand">{{ brand }}</mat-option>
+          }
+        </mat-select>
+        <mat-icon matPrefix>local_offer</mat-icon>
+      </mat-form-field>
+
+      <!-- Sort -->
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Sort By</mat-label>
+        <mat-select 
+          [(ngModel)]="selectedSort"
+          (selectionChange)="onFilterChange()"
+        >
+          @for (option of sortOptions; track option.value) {
+            <mat-option [value]="option.value">{{ option.label }}</mat-option>
+          }
+        </mat-select>
+        <mat-icon matPrefix>sort</mat-icon>
+      </mat-form-field>
+
+      <!-- Clear Filters -->
+      @if (hasActiveFilters) {
+        <button 
+          mat-raised-button 
+          color="warn" 
+          (click)="clearFilters()"
+          class="clear-btn"
+        >
+          <mat-icon>clear_all</mat-icon>
+          Clear Filters
+        </button>
+      }
+    </div>
+
+    <!-- Active Filters Chips -->
+    @if (hasActiveFilters) {
+      <div class="active-filters">
+        @if (searchKeyword) {
+          <mat-chip (removed)="searchKeyword = ''; onSearch()">
+            Search: "{{ searchKeyword }}"
+            <button matChipRemove>
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </mat-chip>
+        }
+        @if (selectedBrand) {
+          <mat-chip (removed)="selectedBrand = null; onFilterChange()">
+            Brand: {{ selectedBrand }}
+            <button matChipRemove>
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </mat-chip>
+        }
+      </div>
+    }
+
+    <!-- Loading Spinner -->
+    @if (isLoading) {
+      <div class="loading-container">
+        <mat-spinner diameter="60"></mat-spinner>
+        <p>Loading products...</p>
+      </div>
+    }
+
+    <!-- Products Grid -->
+    @if (!isLoading && products.length > 0) {
+      <div class="products-grid">
+        @for (product of products; track product.id) {
+          <app-product-card [product]="product"></app-product-card>
+        }
+      </div>
+
+      <!-- Pagination -->
+      <mat-paginator
+        [length]="totalElements"
+        [pageSize]="pageSize"
+        [pageIndex]="pageIndex"
+        [pageSizeOptions]="[12, 24, 36, 48]"
+        (page)="onPageChange($event)"
+        showFirstLastButtons
+      >
+      </mat-paginator>
+    }
+
+    <!-- No Results -->
+    @if (!isLoading && products.length === 0) {
+      <div class="no-results">
+        <mat-icon>search_off</mat-icon>
+        <h3>No products found</h3>
+        <p>Try adjusting your filters or search terms</p>
+        @if (hasActiveFilters) {
+          <button mat-raised-button color="primary" (click)="clearFilters()">
+            Clear All Filters
+          </button>
+        }
+      </div>
+    }
+  </section>
+</div>

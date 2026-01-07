@@ -94,16 +94,18 @@ export class RegisterComponent implements OnInit {
     const request: RegisterRequest = registerData;
 
     // Convert empty phoneNumber to null
-      if (!registerData.phoneNumber) {
-        registerData.phoneNumber = null;
-      }
+    if (!registerData.phoneNumber) {
+      registerData.phoneNumber = null;
+    }
 
     this.authService.register(request).subscribe({
       next: (response) => {
+        this.isLoading = false;
         this.showSuccess('Registration successful! Please check your email to verify your account.');
+        // Redirect after 1.5 seconds
         setTimeout(() => {
           this.router.navigate(['/auth/login']);
-        }, 2000);
+        }, 1500);
       },
       error: (error) => {
         this.isLoading = false;

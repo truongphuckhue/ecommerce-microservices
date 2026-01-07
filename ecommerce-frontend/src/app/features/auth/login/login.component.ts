@@ -45,13 +45,8 @@ export class LoginComponent implements OnInit {
   ngOnInit(): void {
     this.createForm();
     
-    // Get return URL from route parameters or default to '/'
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
-
-    // Redirect if already logged in
-    if (this.authService.isAuthenticated()) {
-      this.router.navigate([this.returnUrl]);
-    }
+    // Get return URL from route parameters or default to '/products'
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/products';
   }
 
   private createForm(): void {
@@ -72,8 +67,10 @@ export class LoginComponent implements OnInit {
 
     this.authService.login(loginData).subscribe({
       next: (response) => {
+        this.isLoading = false;
         this.showSuccess('Login successful! Welcome back.');
-        this.router.navigate([this.returnUrl]);
+        // Navigate to products page instead of dashboard
+        this.router.navigate(['/products']);
       },
       error: (error) => {
         this.isLoading = false;

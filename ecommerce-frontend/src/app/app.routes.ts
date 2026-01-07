@@ -4,7 +4,7 @@ import { authGuard } from './core/guards/auth.guard';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: '/auth/login',
+    redirectTo: '/products',
     pathMatch: 'full'
   },
   {
@@ -21,12 +21,25 @@ export const routes: Routes = [
     ]
   },
   {
+    path: 'products',
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./features/products/product-list/product-list.component').then(m => m.ProductListComponent)
+      },
+      {
+        path: ':id',
+        loadComponent: () => import('./features/products/product-detail/product-detail.component').then(m => m.ProductDetailComponent)
+      }
+    ]
+  },
+  {
     path: 'dashboard',
     canActivate: [authGuard],
     loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent)
   },
   {
     path: '**',
-    redirectTo: '/auth/login'
+    redirectTo: '/products'
   }
 ];
