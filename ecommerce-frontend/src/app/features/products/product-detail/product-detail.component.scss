@@ -5,9 +5,61 @@
 
   .loading {
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     min-height: 400px;
+    gap: 20px;
+
+    p {
+      color: #666;
+      font-size: 16px;
+    }
+  }
+
+  // ✅ NEW: Error state styling
+  .error-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    text-align: center;
+    padding: 40px 20px;
+
+    mat-icon {
+      font-size: 80px;
+      width: 80px;
+      height: 80px;
+      color: #f44336;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      font-size: 28px;
+      color: #333;
+      margin: 10px 0;
+    }
+
+    p {
+      color: #666;
+      margin-bottom: 30px;
+      max-width: 500px;
+      line-height: 1.6;
+    }
+
+    .error-actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+
+      button {
+        mat-icon {
+          margin-right: 8px;
+        }
+      }
+    }
   }
 
   .breadcrumb {
@@ -49,14 +101,20 @@
     .image-section {
       .main-image {
         position: relative;
+        width: 100%;
+        padding-top: 100%; // Creates 1:1 aspect ratio
         border-radius: 12px;
         overflow: hidden;
         background: #f5f5f5;
         margin-bottom: 20px;
 
         img {
+          position: absolute;
+          top: 0;
+          left: 0;
           width: 100%;
-          height: auto;
+          height: 100%;
+          object-fit: cover;
           display: block;
         }
 
@@ -65,6 +123,7 @@
           position: absolute;
           top: 20px;
           font-weight: bold;
+          z-index: 2;
         }
 
         .sale-badge {
@@ -350,6 +409,12 @@
       color: #666;
       margin-bottom: 30px;
     }
+
+    button {
+      mat-icon {
+        margin-right: 8px;
+      }
+    }
   }
 }
 
@@ -397,6 +462,30 @@
           .wishlist {
             width: 100%;
           }
+        }
+      }
+    }
+
+    .error-message,
+    .not-found {
+      padding: 20px;
+
+      mat-icon {
+        font-size: 60px;
+        width: 60px;
+        height: 60px;
+      }
+
+      h2 {
+        font-size: 22px;
+      }
+
+      .error-actions {
+        flex-direction: column;
+        width: 100%;
+
+        button {
+          width: 100%;
         }
       }
     }

@@ -41,8 +41,12 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
         Pageable pageable
     );
 
-    @Query("SELECT p FROM Product p WHERE p.featured = true AND p.active = true")
-    List<Product> findFeaturedProducts(Pageable pageable);
+    @Query("SELECT DISTINCT p FROM Product p " +
+            "LEFT JOIN FETCH p.images " +
+            "LEFT JOIN FETCH p.category " +
+            "WHERE p.featured = true AND p.active = true " +
+            "ORDER BY p.createdAt DESC")
+    List<Product> findFeaturedProductsWithDetails();
 
     @Query("SELECT p FROM Product p WHERE p.active = true ORDER BY p.soldCount DESC")
     List<Product> findBestSellingProducts(Pageable pageable);
@@ -73,4 +77,13 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     @Query("SELECT COUNT(p) FROM Product p WHERE p.category.id = :categoryId AND p.active = true")
     long countByCategoryId(@Param("categoryId") Long categoryId);
+
+    @Query("SELECT DISTINCT p FROM Product p " +
+            "LEFT JOIN FETCH p.images " +
+            "LEFT JOIN FETCH p.category " +
+            "WHERE p.active = true " +
+            "ORDER BY p.createdAt DESC")
+    List<Product> findAllActiveWithDetails();
+
+    long countByActiveTrue();
 }

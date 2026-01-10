@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -13,6 +13,7 @@ import { ProductService } from '../../../core/services/product.service';
 import { ProductResponse, PageResponse, ProductSearchCriteria } from '../../../core/models/product.model';
 import { ProductCardComponent } from '../../../shared/components/product-card/product-card.component';
 import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
+import { finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-product-list',
@@ -36,22 +37,23 @@ import { NavbarComponent } from '../../../shared/components/navbar/navbar.compon
 })
 export class ProductListComponent implements OnInit {
   private productService = inject(ProductService);
+  private cdr = inject(ChangeDetectorRef);
 
   products: ProductResponse[] = [];
   featuredProducts: ProductResponse[] = [];
   isLoading = false;
-  
+
   // Pagination
   totalElements = 0;
   pageSize = 12;
   pageIndex = 0;
-  
+
   // Filters
   searchKeyword = '';
   selectedBrand: string | null = null;
   selectedSort = 'createdAt_desc';
   brands: string[] = [];
-  
+
   // Filter options
   sortOptions = [
     { value: 'createdAt_desc', label: 'Newest First' },
@@ -63,6 +65,7 @@ export class ProductListComponent implements OnInit {
   ];
 
   ngOnInit(): void {
+    console.log('🚀 ProductListComponent ngOnInit');
     this.loadFeaturedProducts();
     this.loadBrands();
     this.loadProducts();
@@ -71,10 +74,12 @@ export class ProductListComponent implements OnInit {
   loadFeaturedProducts(): void {
     this.productService.getFeaturedProducts(8).subscribe({
       next: (products) => {
-        this.featuredProducts = products;
+        console.log('✅ Featured products loaded:', products?.length);
+        this.featuredProducts = products || [];
+        this.cdr.detectChanges();
       },
       error: (error) => {
-        console.error('Error loading featured products:', error);
+        console.error('❌ Error loading featured products:', error);
       }
     });
   }
@@ -82,17 +87,20 @@ export class ProductListComponent implements OnInit {
   loadBrands(): void {
     this.productService.getAllBrands().subscribe({
       next: (brands) => {
-        this.brands = brands;
+        console.log('✅ Brands loaded:', brands?.length);
+        this.brands = brands || [];
+        this.cdr.detectChanges();
       },
       error: (error) => {
-        console.error('Error loading brands:', error);
+        console.error('❌ Error loading brands:', error);
       }
     });
   }
 
   loadProducts(): void {
+    console.log('🔄 loadProducts called');
     this.isLoading = true;
-    
+
     const criteria: ProductSearchCriteria = {
       keyword: this.searchKeyword || undefined,
       brand: this.selectedBrand || undefined,
@@ -102,17 +110,46 @@ export class ProductListComponent implements OnInit {
       sortDirection: this.getSortDirection()
     };
 
-    this.productService.searchProducts(criteria).subscribe({
-      next: (response: PageResponse<ProductResponse>) => {
-        this.products = response.content;
-        this.totalElements = response.totalElements;
-        this.isLoading = false;
-      },
-      error: (error) => {
-        console.error('Error loading products:', error);
-        this.isLoading = false;
-      }
-    });
+    console.log('📦 Calling API with criteria:', criteria);
+
+    this.productService.searchProducts(criteria)
+      .pipe(
+        finalize(() => {
+          console.log('🏁 API call finalized, setting isLoading = false');
+          this.isLoading = false;
+          this.cdr.detectChanges();
+        })
+      )
+      .subscribe({
+        next: (response: PageResponse<ProductResponse>) => {
+          console.log('✅ Products API response:', {
+            totalElements: response?.totalElements,
+            contentLength: response?.content?.length,
+            firstProduct: response?.content?.[0]?.name
+          });
+
+          this.products = response?.content || [];
+          this.totalElements = response?.totalElements || 0;
+
+          console.log('📊 Component state updated:', {
+            productsLength: this.products.length,
+            totalElements: this.totalElements,
+            isLoading: this.isLoading
+          });
+
+          this.cdr.detectChanges();
+        },
+        error: (error) => {
+          console.error('❌ Error loading products:', {
+            status: error.status,
+            statusText: error.statusText,
+            message: error.message,
+            url: error.url
+          });
+          this.products = [];
+          this.cdr.detectChanges();
+        }
+      });
   }
 
   onSearch(): void {

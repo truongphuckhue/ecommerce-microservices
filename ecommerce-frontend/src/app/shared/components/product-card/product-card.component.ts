@@ -30,8 +30,8 @@ import { ProductResponse } from '../../../core/models/product.model';
         @if (product.featured) {
           <mat-chip class="featured-badge">Featured</mat-chip>
         }
-        <img 
-          [src]="productImage" 
+        <img
+          [src]="productImage"
           [alt]="product.name"
           (error)="onImageError($event)"
         >
@@ -55,7 +55,7 @@ import { ProductResponse } from '../../../core/models/product.model';
         @if (product.averageRating && product.reviewCount > 0) {
           <div class="rating">
             <mat-icon class="star">star</mat-icon>
-            <span class="rating-value">{{ product.averageRating.toFixed(1) }}</span>
+            <span class="rating-value">{{ formatRating(product.averageRating) }}</span>
             <span class="review-count">({{ product.reviewCount }})</span>
           </div>
         }
@@ -64,14 +64,14 @@ import { ProductResponse } from '../../../core/models/product.model';
         <div class="price-container">
           @if (product.discountPrice && product.discountPrice < product.price) {
             <div class="price-with-discount">
-              <span class="original-price">\${{ product.price.toFixed(2) }}</span>
-              <span class="discount-price">\${{ product.discountPrice.toFixed(2) }}</span>
+              <span class="original-price">\${{ formatPrice(product.price) }}</span>
+              <span class="discount-price">\${{ formatPrice(product.discountPrice) }}</span>
               <span class="discount-percent">
                 -{{ calculateDiscount() }}%
               </span>
             </div>
           } @else {
-            <span class="regular-price">\${{ product.price.toFixed(2) }}</span>
+            <span class="regular-price">\${{ formatPrice(product.price) }}</span>
           }
         </div>
 
@@ -88,9 +88,9 @@ import { ProductResponse } from '../../../core/models/product.model';
       </mat-card-content>
 
       <mat-card-actions>
-        <button 
-          mat-raised-button 
-          color="primary" 
+        <button
+          mat-raised-button
+          color="primary"
           class="add-to-cart-btn"
           [disabled]="product.stockQuantity === 0"
           (click)="onAddToCart($event)"
@@ -299,12 +299,28 @@ export class ProductCardComponent {
     if (this.product.images && this.product.images.length > 0) {
       return this.product.images[0];
     }
-    return 'https://via.placeholder.com/300x300?text=No+Image';
+    return 'https://placehold.co/300x300?text=No+Image';
   }
 
   onImageError(event: Event): void {
     const img = event.target as HTMLImageElement;
-    img.src = 'https://via.placeholder.com/300x300?text=No+Image';
+    img.src = 'https://placehold.co/300x300?text=No+Image';
+  }
+
+  // ✅ NEW: Safe price formatting with null checks
+  formatPrice(price: number | undefined | null): string {
+    if (price == null || isNaN(price)) {
+      return '0.00';
+    }
+    return price.toFixed(2);
+  }
+
+  // ✅ NEW: Safe rating formatting with null checks
+  formatRating(rating: number | undefined | null): string {
+    if (rating == null || isNaN(rating)) {
+      return '0.0';
+    }
+    return rating.toFixed(1);
   }
 
   calculateDiscount(): number {

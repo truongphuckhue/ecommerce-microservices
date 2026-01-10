@@ -184,15 +184,20 @@ public class ProductServiceImpl implements ProductService {
         log.debug("Fetching all products: page={}, size={}, sortBy={}, sortDirection={}", 
                   page, size, sortBy, sortDirection);
 
-        Sort.Direction direction = "desc".equalsIgnoreCase(sortDirection) 
-            ? Sort.Direction.DESC 
-            : Sort.Direction.ASC;
-        
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
-        
-        Page<Product> products = productRepository.findByActiveTrue(pageable);
-        
-        return products.map(ProductResponse::fromProduct);
+        List<Product> allProducts = productRepository.findAllActiveWithDetails();
+        long total = productRepository.countByActiveTrue();
+
+        int start = page * size;
+        int end = Math.min(start + size, allProducts.size());
+
+        List<ProductResponse> responses = new ArrayList<>();
+        if (start < allProducts.size()) {
+            responses = allProducts.subList(start, end).stream()
+                    .map(ProductResponse::fromProduct)
+                    .collect(Collectors.toList());
+        }
+
+        return new PageImpl<>(responses, PageRequest.of(page, size), total);
     }
 
     @Override
@@ -238,9 +243,10 @@ public class ProductServiceImpl implements ProductService {
         log.debug("Fetching featured products: limit={}", limit);
 
         Pageable pageable = PageRequest.of(0, limit);
-        List<Product> products = productRepository.findFeaturedProducts(pageable);
+        List<Product> products = productRepository.findFeaturedProductsWithDetails();
         
         return products.stream()
+                .limit(limit)
                 .map(ProductResponse::fromProduct)
                 .collect(Collectors.toList());
     }

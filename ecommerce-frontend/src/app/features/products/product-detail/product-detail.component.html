@@ -1,0 +1,226 @@
+<app-navbar></app-navbar>
+
+<div class="product-detail-container">
+  <!-- ✅ DEBUG PANEL - ALWAYS VISIBLE
+  @if (showDebug) {
+    <div style="background: #ffeb3b; padding: 20px; margin: 20px 0; border: 3px solid #f57c00; border-radius: 8px; font-family: monospace;">
+      <h3 style="margin: 0 0 15px 0; color: #e65100;">🔍 DEBUG INFO</h3>
+      <div style="background: white; padding: 15px; border-radius: 4px;">
+        <p style="margin: 5px 0;"><strong>isLoading:</strong> {{ isLoading }}</p>
+        <p style="margin: 5px 0;"><strong>hasError:</strong> {{ hasError }}</p>
+        <p style="margin: 5px 0;"><strong>product exists:</strong> {{ !!product }}</p>
+        <p style="margin: 5px 0;"><strong>product name:</strong> {{ product?.name || 'null' }}</p>
+        <p style="margin: 5px 0;"><strong>errorMessage:</strong> {{ errorMessage || 'none' }}</p>
+        <hr style="margin: 15px 0;">
+        <p style="margin: 5px 0;"><strong>Template evaluation:</strong></p>
+        <ul style="margin: 10px 0; padding-left: 20px;">
+          <li>Loading block should show: {{ isLoading ? 'YES ✅' : 'NO ❌' }}</li>
+          <li>Error block should show: {{ (!isLoading && hasError) ? 'YES ✅' : 'NO ❌' }}</li>
+          <li>Product block should show: {{ (!isLoading && !hasError && product) ? 'YES ✅' : 'NO ❌' }}</li>
+          <li>Not found block should show: {{ (!isLoading && !hasError && !product) ? 'YES ✅' : 'NO ❌' }}</li>
+        </ul>
+        <button mat-button (click)="showDebug = false" style="margin-top: 10px;">Hide Debug</button>
+      </div>
+    </div>
+  }-->
+
+  <!-- Loading State -->
+  @if (isLoading) {
+    <div class="loading" style="background: #bbdefb; padding: 40px; margin: 20px 0; border: 3px solid #2196f3; border-radius: 8px;">
+      <h2 style="text-align: center; color: #1565c0;">⏳ LOADING STATE ACTIVE</h2>
+      <div style="text-align: center;">
+        <mat-spinner diameter="60" style="margin: 20px auto;"></mat-spinner>
+        <p style="color: #1976d2; font-size: 16px;">Loading product details...</p>
+      </div>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (!isLoading && hasError) {
+    <div class="error-message" style="background: #ffcdd2; padding: 40px; margin: 20px 0; border: 3px solid #f44336; border-radius: 8px;">
+      <h2 style="text-align: center; color: #c62828;">❌ ERROR STATE ACTIVE</h2>
+      <div style="text-align: center;">
+        <mat-icon style="font-size: 80px; width: 80px; height: 80px; color: #f44336;">error_outline</mat-icon>
+        <h2>Unable to Load Product</h2>
+        <p>{{ errorMessage }}</p>
+        <div class="error-actions" style="margin-top: 20px; display: flex; gap: 12px; justify-content: center;">
+          <button mat-raised-button color="primary" (click)="retryLoad()">
+            <mat-icon>refresh</mat-icon>
+            Try Again
+          </button>
+          <button mat-stroked-button routerLink="/products">
+            <mat-icon>arrow_back</mat-icon>
+            Back to Products
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Product Content -->
+  @if (!isLoading && !hasError && product) {
+    <div style="background: #c8e6c9; padding: 20px; margin: 20px 0; border: 3px solid #4caf50; border-radius: 8px;">
+      <h2 style="text-align: center; color: #2e7d32;">✅ PRODUCT STATE ACTIVE</h2>
+      <div style="background: white; padding: 15px; margin: 10px 0; border-radius: 4px;">
+        <p><strong>Product Name:</strong> {{ product.name }}</p>
+        <p><strong>Product ID:</strong> {{ product.id }}</p>
+        <p><strong>Price:</strong> ${{ formatPrice(product.price) }}</p>
+      </div>
+    </div>
+
+    <div class="breadcrumb">
+      <a routerLink="/products">Products</a>
+      <mat-icon>chevron_right</mat-icon>
+      @if (product.category) {
+        <span>{{ product.category.name }}</span>
+        <mat-icon>chevron_right</mat-icon>
+      }
+      <span class="current">{{ product.name }}</span>
+    </div>
+
+    <div class="product-content">
+      <!-- Image Gallery -->
+      <div class="image-section">
+        <div class="main-image">
+          <img [src]="selectedImage" [alt]="product.name" (error)="onImageError($event)">
+          @if (product.onSale) {
+            <mat-chip class="sale-badge">SALE</mat-chip>
+          }
+          @if (product.featured) {
+            <mat-chip class="featured-badge">FEATURED</mat-chip>
+          }
+        </div>
+        @if (product.images && product.images.length > 1) {
+          <div class="thumbnail-list">
+            @for (image of product.images ?? []; track image) {
+              <img
+                [src]="image"
+                [alt]="product.name"
+                [class.active]="image === selectedImage"
+                (click)="selectedImage = image"
+                (error)="onImageError($event)"
+              >
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Product Info -->
+      <div class="info-section">
+        <h1 class="product-name">{{ product.name }}</h1>
+
+        <div class="meta-info">
+          <span class="sku">SKU: {{ product.sku }}</span>
+          @if (product.brand) {
+            <span class="brand">Brand: {{ product.brand }}</span>
+          }
+        </div>
+
+        @if (product.averageRating && product.reviewCount > 0) {
+          <div class="rating">
+            <div class="stars">
+              @for (star of [1,2,3,4,5]; track star) {
+                <mat-icon [class.filled]="star <= (product.averageRating || 0)">star</mat-icon>
+              }
+            </div>
+            <span class="rating-value">{{ formatRating(product.averageRating) }}</span>
+            <span class="reviews">({{ product.reviewCount }} reviews)</span>
+          </div>
+        }
+
+        <mat-divider></mat-divider>
+
+        <div class="price-section">
+          @if (product.discountPrice && product.discountPrice < product.price) {
+            <div class="price-with-discount">
+              <span class="original-price">${{ formatPrice(product.price) }}</span>
+              <span class="discount-price">${{ formatPrice(product.discountPrice) }}</span>
+              <mat-chip class="discount-badge">
+                Save {{ calculateDiscount() }}%
+              </mat-chip>
+            </div>
+          } @else {
+            <div class="regular-price">${{ formatPrice(product.price) }}</div>
+          }
+        </div>
+
+        <div class="stock-section">
+          @if (product.stockQuantity > 0) {
+            <mat-icon class="in-stock">check_circle</mat-icon>
+            <span class="stock-text">In Stock ({{ product.stockQuantity }} available)</span>
+          } @else {
+            <mat-icon class="out-of-stock">cancel</mat-icon>
+            <span class="stock-text out">Out of Stock</span>
+          }
+        </div>
+
+        <div class="description">
+          <h3>Description</h3>
+          <p>{{ product.description }}</p>
+        </div>
+
+        @if (product.weight || product.dimensions) {
+          <div class="specifications">
+            <h3>Specifications</h3>
+            @if (product.weight) {
+              <div class="spec-item">
+                <span class="label">Weight:</span>
+                <span class="value">{{ product.weight }} kg</span>
+              </div>
+            }
+            @if (product.dimensions) {
+              <div class="spec-item">
+                <span class="label">Dimensions:</span>
+                <span class="value">{{ product.dimensions }}</span>
+              </div>
+            }
+          </div>
+        }
+
+        <div class="actions">
+          <button
+            mat-raised-button
+            color="primary"
+            class="add-to-cart"
+            [disabled]="product.stockQuantity === 0"
+            (click)="addToCart()"
+          >
+            <mat-icon>shopping_cart</mat-icon>
+            Add to Cart
+          </button>
+          <button mat-stroked-button class="wishlist">
+            <mat-icon>favorite_border</mat-icon>
+            Add to Wishlist
+          </button>
+        </div>
+
+        <div class="stats">
+          <div class="stat-item">
+            <mat-icon>visibility</mat-icon>
+            <span>{{ product.viewCount }} views</span>
+          </div>
+          <div class="stat-item">
+            <mat-icon>shopping_bag</mat-icon>
+            <span>{{ product.soldCount }} sold</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Product Not Found -->
+  @if (!isLoading && !hasError && !product) {
+    <div class="not-found" style="background: #ffccbc; padding: 40px; margin: 20px 0; border: 3px solid #ff5722; border-radius: 8px;">
+      <h2 style="text-align: center; color: #d84315;">🚫 NOT FOUND STATE ACTIVE</h2>
+      <div style="text-align: center;">
+        <mat-icon style="font-size: 80px; width: 80px; height: 80px; color: #ff5722;">search_off</mat-icon>
+        <h2>Product Not Found</h2>
+        <p>The product you're looking for doesn't exist.</p>
+        <button mat-raised-button color="primary" routerLink="/products" style="margin-top: 20px;">
+          <mat-icon>arrow_back</mat-icon>
+          Back to Products
+        </button>
+      </div>
+    </div>
+  }
+</div>

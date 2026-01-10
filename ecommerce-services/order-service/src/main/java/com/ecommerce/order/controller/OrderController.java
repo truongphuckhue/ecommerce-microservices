@@ -1,6 +1,7 @@
 package com.ecommerce.order.controller;
 
-import com.ecommerce.common.dto.ApiResponse;
+
+import com.ecommerce.order.common.dto.ApiResponse;
 import com.ecommerce.order.dto.OrderRequest;
 import com.ecommerce.order.dto.OrderResponse;
 import com.ecommerce.order.entity.Order;

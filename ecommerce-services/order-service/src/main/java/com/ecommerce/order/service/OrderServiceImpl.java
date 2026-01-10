@@ -1,6 +1,6 @@
 package com.ecommerce.order.service;
 
-import com.ecommerce.common.exception.ResourceNotFoundException;
+import com.ecommerce.order.common.exception.ResourceNotFoundException;
 import com.ecommerce.order.dto.OrderItemRequest;
 import com.ecommerce.order.dto.OrderRequest;
 import com.ecommerce.order.dto.OrderResponse;
@@ -54,14 +54,14 @@ public class OrderServiceImpl implements OrderService {
         });
 
         // Save order
-        order = orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
 
         log.info("Order created: {}", orderNumber);
 
         // Start saga asynchronously
-        orderSaga.startSaga(order);
+        orderSaga.startSaga(savedOrder);
 
-        return OrderResponse.fromOrder(order);
+        return OrderResponse.fromOrder(savedOrder);
     }
 
     private OrderItem createOrderItem(OrderItemRequest request) {

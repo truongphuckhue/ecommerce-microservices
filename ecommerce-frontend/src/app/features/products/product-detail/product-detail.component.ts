@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
@@ -24,169 +24,7 @@ import { NavbarComponent } from '../../../shared/components/navbar/navbar.compon
     MatProgressSpinnerModule,
     NavbarComponent
   ],
-  template: `
-    <app-navbar></app-navbar>
-
-    <div class="product-detail-container">
-      @if (isLoading) {
-        <div class="loading">
-          <mat-spinner diameter="60"></mat-spinner>
-        </div>
-      }
-
-      @if (!isLoading && product) {
-        <div class="breadcrumb">
-          <a routerLink="/products">Products</a>
-          <mat-icon>chevron_right</mat-icon>
-          @if (product.category) {
-            <span>{{ product.category.name }}</span>
-            <mat-icon>chevron_right</mat-icon>
-          }
-          <span class="current">{{ product.name }}</span>
-        </div>
-
-        <div class="product-content">
-          <!-- Image Gallery -->
-          <div class="image-section">
-            <div class="main-image">
-              <img [src]="selectedImage" [alt]="product.name" (error)="onImageError($event)">
-              @if (product.onSale) {
-                <mat-chip class="sale-badge">SALE</mat-chip>
-              }
-              @if (product.featured) {
-                <mat-chip class="featured-badge">FEATURED</mat-chip>
-              }
-            </div>
-            @if (product.images && product.images.length > 1) {
-              <div class="thumbnail-list">
-                @for (image of product.images; track image) {
-                  <img 
-                    [src]="image" 
-                    [alt]="product.name"
-                    [class.active]="image === selectedImage"
-                    (click)="selectedImage = image"
-                    (error)="onImageError($event)"
-                  >
-                }
-              </div>
-            }
-          </div>
-
-          <!-- Product Info -->
-          <div class="info-section">
-            <h1 class="product-name">{{ product.name }}</h1>
-            
-            <div class="meta-info">
-              <span class="sku">SKU: {{ product.sku }}</span>
-              @if (product.brand) {
-                <span class="brand">Brand: {{ product.brand }}</span>
-              }
-            </div>
-
-            @if (product.averageRating && product.reviewCount > 0) {
-              <div class="rating">
-                <div class="stars">
-                  @for (star of [1,2,3,4,5]; track star) {
-                    <mat-icon [class.filled]="star <= (product.averageRating || 0)">star</mat-icon>
-                  }
-                </div>
-                <span class="rating-value">{{ product.averageRating?.toFixed(1) }}</span>
-                <span class="reviews">({{ product.reviewCount }} reviews)</span>
-              </div>
-            }
-
-            <mat-divider></mat-divider>
-
-            <div class="price-section">
-              @if (product.discountPrice && product.discountPrice < product.price) {
-                <div class="price-with-discount">
-                  <span class="original-price">\${{ product.price.toFixed(2) }}</span>
-                  <span class="discount-price">\${{ product.discountPrice.toFixed(2) }}</span>
-                  <mat-chip class="discount-badge">
-                    Save {{ calculateDiscount() }}%
-                  </mat-chip>
-                </div>
-              } @else {
-                <div class="regular-price">\${{ product.price.toFixed(2) }}</div>
-              }
-            </div>
-
-            <div class="stock-section">
-              @if (product.stockQuantity > 0) {
-                <mat-icon class="in-stock">check_circle</mat-icon>
-                <span class="stock-text">In Stock ({{ product.stockQuantity }} available)</span>
-              } @else {
-                <mat-icon class="out-of-stock">cancel</mat-icon>
-                <span class="stock-text out">Out of Stock</span>
-              }
-            </div>
-
-            <div class="description">
-              <h3>Description</h3>
-              <p>{{ product.description }}</p>
-            </div>
-
-            @if (product.weight || product.dimensions) {
-              <div class="specifications">
-                <h3>Specifications</h3>
-                @if (product.weight) {
-                  <div class="spec-item">
-                    <span class="label">Weight:</span>
-                    <span class="value">{{ product.weight }} kg</span>
-                  </div>
-                }
-                @if (product.dimensions) {
-                  <div class="spec-item">
-                    <span class="label">Dimensions:</span>
-                    <span class="value">{{ product.dimensions }}</span>
-                  </div>
-                }
-              </div>
-            }
-
-            <div class="actions">
-              <button 
-                mat-raised-button 
-                color="primary" 
-                class="add-to-cart"
-                [disabled]="product.stockQuantity === 0"
-                (click)="addToCart()"
-              >
-                <mat-icon>shopping_cart</mat-icon>
-                Add to Cart
-              </button>
-              <button mat-stroked-button class="wishlist">
-                <mat-icon>favorite_border</mat-icon>
-                Add to Wishlist
-              </button>
-            </div>
-
-            <div class="stats">
-              <div class="stat-item">
-                <mat-icon>visibility</mat-icon>
-                <span>{{ product.viewCount }} views</span>
-              </div>
-              <div class="stat-item">
-                <mat-icon>shopping_bag</mat-icon>
-                <span>{{ product.soldCount }} sold</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      }
-
-      @if (!isLoading && !product) {
-        <div class="not-found">
-          <mat-icon>search_off</mat-icon>
-          <h2>Product Not Found</h2>
-          <p>The product you're looking for doesn't exist.</p>
-          <button mat-raised-button color="primary" routerLink="/products">
-            Back to Products
-          </button>
-        </div>
-      }
-    </div>
-  `,
+  templateUrl: './product-detail.component.html',
   styleUrls: ['./product-detail.component.scss']
 })
 export class ProductDetailComponent implements OnInit {
@@ -194,39 +32,118 @@ export class ProductDetailComponent implements OnInit {
   private router = inject(Router);
   private productService = inject(ProductService);
   private snackBar = inject(MatSnackBar);
+  private cdr = inject(ChangeDetectorRef);
 
   product: ProductResponse | null = null;
   selectedImage = '';
   isLoading = false;
+  hasError = false;
+  errorMessage = '';
+  showDebug = true; // ✅ Always show debug panel initially
 
   ngOnInit(): void {
+    console.log('🚀 ProductDetailComponent ngOnInit');
+    
     const productId = this.route.snapshot.paramMap.get('id');
-    if (productId) {
-      this.loadProduct(+productId);
+    console.log('📦 Product ID from route:', productId);
+
+    if (!productId) {
+      console.error('❌ Missing product ID in route');
+      this.hasError = true;
+      this.errorMessage = 'Product ID is missing from the URL';
+      this.cdr.detectChanges();
+      return;
     }
+
+    const id = Number(productId);
+    if (isNaN(id)) {
+      console.error('❌ Invalid product ID:', productId);
+      this.hasError = true;
+      this.errorMessage = `Invalid product ID: "${productId}"`;
+      this.cdr.detectChanges();
+      return;
+    }
+
+    console.log('✅ Valid product ID:', id);
+    this.loadProduct(id);
   }
 
   loadProduct(id: number): void {
+    console.log('🔄 Loading product with ID:', id);
     this.isLoading = true;
+    this.hasError = false;
+    this.errorMessage = '';
+    this.cdr.detectChanges();
+
     this.productService.getProductById(id).subscribe({
       next: (product) => {
+        console.log('✅ Product loaded successfully:', product);
         this.product = product;
-        this.selectedImage = product.images?.[0] || 'https://via.placeholder.com/600x600?text=No+Image';
+        this.selectedImage = product.images?.[0] || 'https://placehold.co/600x600?text=No+Image';
         this.isLoading = false;
         
+        console.log('🔍 State after loading:', {
+          isLoading: this.isLoading,
+          hasError: this.hasError,
+          productExists: !!this.product,
+          productName: this.product?.name
+        });
+        
+        this.cdr.detectChanges();
+
         // Increment view count
-        this.productService.incrementViewCount(id).subscribe();
+        this.productService.incrementViewCount(id).subscribe({
+          next: () => console.log('👁️ View count incremented'),
+          error: (err) => console.warn('⚠️ Failed to increment view count:', err)
+        });
       },
       error: (error) => {
-        console.error('Error loading product:', error);
+        console.error('❌ Error loading product:', error);
         this.isLoading = false;
+        this.hasError = true;
+        
+        if (error.status === 404) {
+          this.errorMessage = 'Product not found. It may have been removed or the ID is incorrect.';
+        } else if (error.status === 0) {
+          this.errorMessage = 'Cannot connect to the server. Please check your internet connection.';
+        } else if (error.status >= 500) {
+          this.errorMessage = 'Server error. Please try again later.';
+        } else {
+          this.errorMessage = error.error?.message || error.message || 'An unexpected error occurred.';
+        }
+        
+        this.cdr.detectChanges();
       }
     });
   }
 
+  retryLoad(): void {
+    const productId = this.route.snapshot.paramMap.get('id');
+    if (productId) {
+      const id = Number(productId);
+      if (!isNaN(id)) {
+        this.loadProduct(id);
+      }
+    }
+  }
+
   onImageError(event: Event): void {
     const img = event.target as HTMLImageElement;
-    img.src = 'https://via.placeholder.com/600x600?text=No+Image';
+    img.src = 'https://placehold.co/600x600?text=No+Image';
+  }
+
+  formatPrice(price: number | undefined | null): string {
+    if (price == null || isNaN(price)) {
+      return '0.00';
+    }
+    return price.toFixed(2);
+  }
+
+  formatRating(rating: number | undefined | null): string {
+    if (rating == null || isNaN(rating)) {
+      return '0.0';
+    }
+    return rating.toFixed(1);
   }
 
   calculateDiscount(): number {
@@ -237,7 +154,6 @@ export class ProductDetailComponent implements OnInit {
   }
 
   addToCart(): void {
-    // TODO: Implement add to cart
     this.snackBar.open('Added to cart!', 'Close', {
       duration: 3000,
       horizontalPosition: 'end',

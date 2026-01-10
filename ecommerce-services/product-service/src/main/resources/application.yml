@@ -70,3 +70,5 @@ management:
 logging:
   level:
     org.springframework.jdbc.datasource.init: DEBUG
+    org.springframework.cache: DEBUG
+    org.hibernate.SQL: DEBUG
