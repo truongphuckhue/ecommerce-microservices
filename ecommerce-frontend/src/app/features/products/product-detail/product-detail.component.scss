@@ -491,3 +491,46 @@
     }
   }
 }
+
+// 🆕 Updated Actions Section
+.actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin: 24px 0;
+
+  .buy-now-btn {
+    flex: 1;
+    height: 48px;
+    font-size: 16px;
+    font-weight: 600;
+
+    mat-icon {
+      margin-right: 8px;
+    }
+  }
+
+  .add-cart-btn {
+    flex: 1;
+    height: 48px;
+
+    mat-icon {
+      margin-right: 8px;
+    }
+  }
+
+  .wishlist-btn {
+    mat-icon {
+      color: #e91e63;
+    }
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+
+    .buy-now-btn,
+    .add-cart-btn {
+      width: 100%;
+    }
+  }
+}

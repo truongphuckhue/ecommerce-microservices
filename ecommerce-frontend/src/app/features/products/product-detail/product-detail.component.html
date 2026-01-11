@@ -176,6 +176,42 @@
             }
           </div>
         }
+        <!-- 🆕 UPDATED ACTION BUTTONS -->
+        <div class="actions">
+          <!-- Primary: Buy Now Button -->
+          <button
+            mat-raised-button
+            color="primary"
+            class="buy-now-btn"
+            [disabled]="product.stockQuantity === 0"
+            (click)="buyNow()"
+          >
+            <mat-icon>flash_on</mat-icon>
+            <span>Buy Now</span>
+          </button>
+
+          <!-- Secondary: Add to Cart -->
+          <button
+            mat-stroked-button
+            color="primary"
+            class="add-cart-btn"
+            [disabled]="product.stockQuantity === 0"
+            (click)="addToCart()"
+          >
+            <mat-icon>shopping_cart</mat-icon>
+            <span>Add to Cart</span>
+          </button>
+
+          <!-- Tertiary: Wishlist -->
+          <button
+            mat-icon-button
+            class="wishlist-btn"
+            (click)="addToWishlist()"
+            matTooltip="Add to Wishlist"
+          >
+            <mat-icon>favorite_border</mat-icon>
+          </button>
+        </div>
 
         <div class="actions">
           <button

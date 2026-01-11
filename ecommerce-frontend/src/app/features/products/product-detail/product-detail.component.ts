@@ -6,7 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ProductService } from '../../../core/services/product.service';
 import { ProductResponse } from '../../../core/models/product.model';
 import { NavbarComponent } from '../../../shared/components/navbar/navbar.component';
@@ -22,7 +22,8 @@ import { NavbarComponent } from '../../../shared/components/navbar/navbar.compon
     MatDividerModule,
     MatChipsModule,
     MatProgressSpinnerModule,
-    NavbarComponent
+    NavbarComponent,
+    MatSnackBarModule
   ],
   templateUrl: './product-detail.component.html',
   styleUrls: ['./product-detail.component.scss']
@@ -43,7 +44,7 @@ export class ProductDetailComponent implements OnInit {
 
   ngOnInit(): void {
     console.log('🚀 ProductDetailComponent ngOnInit');
-    
+
     const productId = this.route.snapshot.paramMap.get('id');
     console.log('📦 Product ID from route:', productId);
 
@@ -81,14 +82,14 @@ export class ProductDetailComponent implements OnInit {
         this.product = product;
         this.selectedImage = product.images?.[0] || 'https://placehold.co/600x600?text=No+Image';
         this.isLoading = false;
-        
+
         console.log('🔍 State after loading:', {
           isLoading: this.isLoading,
           hasError: this.hasError,
           productExists: !!this.product,
           productName: this.product?.name
         });
-        
+
         this.cdr.detectChanges();
 
         // Increment view count
@@ -101,7 +102,7 @@ export class ProductDetailComponent implements OnInit {
         console.error('❌ Error loading product:', error);
         this.isLoading = false;
         this.hasError = true;
-        
+
         if (error.status === 404) {
           this.errorMessage = 'Product not found. It may have been removed or the ID is incorrect.';
         } else if (error.status === 0) {
@@ -111,7 +112,7 @@ export class ProductDetailComponent implements OnInit {
         } else {
           this.errorMessage = error.error?.message || error.message || 'An unexpected error occurred.';
         }
-        
+
         this.cdr.detectChanges();
       }
     });
@@ -154,10 +155,42 @@ export class ProductDetailComponent implements OnInit {
   }
 
   addToCart(): void {
-    this.snackBar.open('Added to cart!', 'Close', {
-      duration: 3000,
-      horizontalPosition: 'end',
-      verticalPosition: 'top'
+      const product = this.product;
+      if (!product || product.stockQuantity === 0) {
+        this.snackBar.open('Product is out of stock', 'Close', { duration: 3000 });
+        return;
+      }
+
+      this.snackBar.open('Cart feature coming soon! Use "Buy Now" for now.', 'Close', {
+        duration: 3000
+      });
+    }
+
+  addToWishlist(): void {
+      this.snackBar.open('Wishlist feature coming soon!', 'Close', { duration: 3000 });
+    }
+
+  buyNow(): void {
+    const product = this.product;
+    if (!product || product.stockQuantity === 0) {
+      this.snackBar.open('Product is out of stock', 'Close', { duration: 3000 });
+      return;
+    }
+
+    // Navigate to create order with preselected product
+    this.router.navigate(['/orders/create'], {
+      state: {
+        preselectedProduct: {
+          id: product.id,
+          name: product.name,
+          sku: product.sku,
+          price: product.effectivePrice,
+          quantity: 1,
+          imageUrl: product.images[0] || ''
+        }
+      }
     });
+
+    this.snackBar.open('Product added to your order!', 'Close', { duration: 2000 });
   }
 }

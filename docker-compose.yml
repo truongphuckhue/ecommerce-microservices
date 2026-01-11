@@ -25,6 +25,23 @@ services:
       timeout: 5s
       retries: 5
 
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: ecommerce-zipkin
+    ports:
+      - "9411:9411"
+    networks:
+      - ecommerce-network
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: ecommerce-mailhog
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Web UI
+    networks:
+      - ecommerce-network
+
   redis:
     image: redis:7-alpine
     container_name: ecommerce-redis

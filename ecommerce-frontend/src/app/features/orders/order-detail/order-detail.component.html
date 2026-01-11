@@ -1,0 +1,237 @@
+<div class="order-detail-container">
+  @if (isLoading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="60"></mat-spinner>
+      <p>Loading order details...</p>
+    </div>
+  }
+
+  @if (!isLoading() && order()) {
+    <!-- Header -->
+    <div class="page-header">
+      <button mat-icon-button (click)="goBack()" class="back-btn">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <h1>Order Details</h1>
+      <div class="header-actions">
+        <button mat-icon-button (click)="refreshOrder()" matTooltip="Refresh">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div class="order-content">
+      <!-- Order Summary Card -->
+      <mat-card class="summary-card">
+        <mat-card-header>
+          <mat-card-title>
+            <div class="summary-title">
+              <div class="order-number">
+                <mat-icon>confirmation_number</mat-icon>
+                <span>{{ order()!.orderNumber }}</span>
+              </div>
+              <mat-chip [color]="statusColors[order()!.status]" highlighted>
+                <mat-icon>{{ getOrderStatusIcon(order()!.status) }}</mat-icon>
+                {{ statusLabels[order()!.status] }}
+              </mat-chip>
+            </div>
+          </mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div class="summary-grid">
+            <!-- Order Date -->
+            <div class="summary-item">
+              <mat-icon>calendar_today</mat-icon>
+              <div>
+                <span class="label">Order Date</span>
+                <span class="value">{{ formatDate(order()!.createdAt) }}</span>
+              </div>
+            </div>
+
+            <!-- Last Updated -->
+            <div class="summary-item">
+              <mat-icon>update</mat-icon>
+              <div>
+                <span class="label">Last Updated</span>
+                <span class="value">{{ formatDate(order()!.updatedAt) }}</span>
+              </div>
+            </div>
+
+            <!-- User ID -->
+            <div class="summary-item">
+              <mat-icon>person</mat-icon>
+              <div>
+                <span class="label">User ID</span>
+                <span class="value">{{ order()!.userId }}</span>
+              </div>
+            </div>
+
+            <!-- Payment Method -->
+            @if (order()!.paymentMethod) {
+              <div class="summary-item">
+                <mat-icon>payment</mat-icon>
+                <div>
+                  <span class="label">Payment Method</span>
+                  <span class="value">{{ order()!.paymentMethod }}</span>
+                </div>
+              </div>
+            }
+
+            <!-- Saga Status -->
+            @if (order()!.sagaStatus) {
+              <div class="summary-item saga">
+                <mat-icon>{{ getSagaStatusIcon(order()!.sagaStatus!) }}</mat-icon>
+                <div>
+                  <span class="label">Saga Status</span>
+                  <span class="value">{{ sagaStatusLabels[order()!.sagaStatus!] }}</span>
+                </div>
+              </div>
+            }
+
+            <!-- Cancellation Reason -->
+            @if (order()!.cancellationReason) {
+              <div class="summary-item cancelled">
+                <mat-icon>info</mat-icon>
+                <div>
+                  <span class="label">Cancellation Reason</span>
+                  <span class="value">{{ order()!.cancellationReason }}</span>
+                </div>
+              </div>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Items Table -->
+      <mat-card class="items-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>shopping_cart</mat-icon>
+            Order Items ({{ order()!.items.length }})
+          </mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+          <table mat-table [dataSource]="order()!.items" class="items-table">
+            <!-- Product Column -->
+            <ng-container matColumnDef="product">
+              <th mat-header-cell *matHeaderCellDef>Product</th>
+              <td mat-cell *matCellDef="let item">
+                <div class="product-info">
+                  <div class="product-name">
+                    {{ item.productName || 'Product #' + item.productId }}
+                  </div>
+                  @if (item.productSku) {
+                    <div class="product-sku">SKU: {{ item.productSku }}</div>
+                  }
+                  @if (!item.productName) {
+                    <div class="product-id">ID: {{ item.productId }}</div>
+                  }
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- Quantity Column -->
+            <ng-container matColumnDef="quantity">
+              <th mat-header-cell *matHeaderCellDef>Quantity</th>
+              <td mat-cell *matCellDef="let item">
+                <span class="quantity-badge">{{ item.quantity }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Unit Price Column -->
+            <ng-container matColumnDef="unitPrice">
+              <th mat-header-cell *matHeaderCellDef>Unit Price</th>
+              <td mat-cell *matCellDef="let item">
+                <span class="price">${{ item.unitPrice.toFixed(2) }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Total Column -->
+            <ng-container matColumnDef="total">
+              <th mat-header-cell *matHeaderCellDef>Total</th>
+              <td mat-cell *matCellDef="let item">
+                <span class="total-price">
+                  ${{ getItemTotal(item.unitPrice, item.quantity, item.totalPrice).toFixed(2) }}
+                </span>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          </table>
+
+          <!-- Order Total -->
+          <div class="order-total">
+            <span>Order Total:</span>
+            <strong>${{ order()!.totalAmount.toFixed(2) }}</strong>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Addresses Card -->
+      <mat-card class="addresses-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>location_on</mat-icon>
+            Delivery Information
+          </mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div class="addresses-grid">
+            <!-- Shipping Address -->
+            @if (order()!.shippingAddress) {
+              <div class="address-section">
+                <h3>
+                  <mat-icon>local_shipping</mat-icon>
+                  Shipping Address
+                </h3>
+                <p>{{ order()!.shippingAddress }}</p>
+              </div>
+            }
+
+            <!-- Billing Address -->
+            @if (order()!.billingAddress) {
+              <div class="address-section">
+                <h3>
+                  <mat-icon>receipt</mat-icon>
+                  Billing Address
+                </h3>
+                <p>{{ order()!.billingAddress }}</p>
+              </div>
+            }
+          </div>
+
+          <!-- Notes -->
+          @if (order()!.notes) {
+            <mat-divider></mat-divider>
+            <div class="notes-section">
+              <h3>
+                <mat-icon>note</mat-icon>
+                Order Notes
+              </h3>
+              <p>{{ order()!.notes }}</p>
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button mat-raised-button (click)="goBack()">
+        <mat-icon>arrow_back</mat-icon>
+        Back to Orders
+      </button>
+
+      @if (canCancelOrder()) {
+        <button mat-raised-button color="warn" (click)="cancelOrder()">
+          <mat-icon>cancel</mat-icon>
+          Cancel Order
+        </button>
+      }
+    </div>
+  }
+</div>

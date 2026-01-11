@@ -1,0 +1,247 @@
+<div class="order-admin-container">
+  <div class="page-header">
+    <h1>
+      <mat-icon>admin_panel_settings</mat-icon>
+      Order Administration
+    </h1>
+  </div>
+
+  <mat-tab-group animationDuration="300ms">
+    <!-- All Orders Tab -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon>list</mat-icon>
+        All Orders ({{ allOrders().length }})
+      </ng-template>
+
+      <div class="tab-content">
+        <div class="tab-header">
+          <button mat-raised-button color="primary" (click)="refreshAll()">
+            <mat-icon>refresh</mat-icon>
+            Refresh
+          </button>
+        </div>
+
+        @if (isLoadingAll()) {
+        <div class="loading-container">
+          <mat-spinner diameter="60"></mat-spinner>
+          <p>Loading all orders...</p>
+        </div>
+        }
+
+        @if (!isLoadingAll() && allOrders().length > 0) {
+        <div class="table-container">
+          <table mat-table [dataSource]="displayedOrders()" class="orders-table">
+            <!-- Order Number Column -->
+            <ng-container matColumnDef="orderNumber">
+              <th mat-header-cell *matHeaderCellDef>Order Number</th>
+              <td mat-cell *matCellDef="let order">
+                <div class="order-number">
+                  <mat-icon>confirmation_number</mat-icon>
+                  {{ order.orderNumber }}
+                </div>
+              </td>
+            </ng-container>
+
+            <!-- User ID Column -->
+            <ng-container matColumnDef="userId">
+              <th mat-header-cell *matHeaderCellDef>User ID</th>
+              <td mat-cell *matCellDef="let order">
+                <mat-chip>{{ order.userId }}</mat-chip>
+              </td>
+            </ng-container>
+
+            <!-- Items Column -->
+            <ng-container matColumnDef="items">
+              <th mat-header-cell *matHeaderCellDef>Items</th>
+              <td mat-cell *matCellDef="let order">
+                <span class="items-count">{{ order.items.length }} item(s)</span>
+              </td>
+            </ng-container>
+
+            <!-- Total Amount Column -->
+            <ng-container matColumnDef="totalAmount">
+              <th mat-header-cell *matHeaderCellDef>Total</th>
+              <td mat-cell *matCellDef="let order">
+                <span class="amount">${{ order.totalAmount.toFixed(2) }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Status Column -->
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Status</th>
+              <td mat-cell *matCellDef="let order">
+                <mat-chip [color]="getStatusColor(order.status)" highlighted>
+                  <mat-icon>{{ getOrderStatusIcon(order.status) }}</mat-icon>
+                  {{ getStatusLabel(order.status) }}
+                </mat-chip>
+              </td>
+            </ng-container>
+
+            <!-- Saga Status Column -->
+            <ng-container matColumnDef="sagaStatus">
+              <th mat-header-cell *matHeaderCellDef>Saga</th>
+              <td mat-cell *matCellDef="let order">
+                @if (order.sagaStatus) {
+                <mat-chip [color]="getSagaStatusColor(order.sagaStatus)" highlighted>
+                  <mat-icon>{{ getSagaStatusIcon(order.sagaStatus) }}</mat-icon>
+                  {{ getSagaStatusLabel(order.sagaStatus) }}
+                </mat-chip>
+                } @else {
+                <span class="na">N/A</span>
+                }
+              </td>
+            </ng-container>
+
+            <!-- Created At Column -->
+            <ng-container matColumnDef="createdAt">
+              <th mat-header-cell *matHeaderCellDef>Created</th>
+              <td mat-cell *matCellDef="let order">
+                <span class="date">{{ formatDate(order.createdAt) }}</span>
+              </td>
+            </ng-container>
+
+            <!-- Actions Column -->
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let order">
+                <button
+                  mat-icon-button
+                  color="primary"
+                  (click)="viewOrderDetails(order.id)"
+                  matTooltip="View Details"
+                >
+                  <mat-icon>visibility</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="order-row"></tr>
+          </table>
+
+          <mat-paginator
+            [length]="totalOrders"
+            [pageSize]="pageSize"
+            [pageIndex]="pageIndex"
+            [pageSizeOptions]="[5, 10, 25, 50]"
+            (page)="onPageChange($event)"
+            showFirstLastButtons
+          >
+          </mat-paginator>
+        </div>
+        }
+
+        @if (!isLoadingAll() && allOrders().length === 0) {
+        <div class="no-data">
+          <mat-icon>inbox</mat-icon>
+          <h3>No orders found</h3>
+          <p>There are currently no orders in the system</p>
+        </div>
+        }
+      </div>
+    </mat-tab>
+
+    <!-- Failed Orders Tab -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon [matBadge]="failedOrders().length" matBadgeColor="warn">error</mat-icon>
+        Failed Orders
+      </ng-template>
+
+      <div class="tab-content">
+        <div class="tab-header">
+          <button mat-raised-button color="primary" (click)="refreshFailed()">
+            <mat-icon>refresh</mat-icon>
+            Refresh
+          </button>
+        </div>
+
+        @if (isLoadingFailed()) {
+        <div class="loading-container">
+          <mat-spinner diameter="60"></mat-spinner>
+          <p>Loading failed orders...</p>
+        </div>
+        }
+
+        @if (!isLoadingFailed() && failedOrders().length > 0) {
+        <div class="failed-orders-grid">
+          @for (order of failedOrders(); track order.id) {
+          <mat-card class="failed-order-card">
+            <mat-card-header>
+              <div class="failed-header">
+                <div class="order-number">
+                  <mat-icon>confirmation_number</mat-icon>
+                  {{ order.orderNumber }}
+                </div>
+                <mat-chip color="warn" highlighted>
+                  <mat-icon>error</mat-icon>
+                  {{ statusLabels[order.status] }}
+                </mat-chip>
+              </div>
+            </mat-card-header>
+
+            <mat-card-content>
+              <div class="failed-info">
+                <div class="info-row">
+                  <mat-icon>person</mat-icon>
+                  <span>User ID: {{ order.userId }}</span>
+                </div>
+
+                <div class="info-row">
+                  <mat-icon>shopping_cart</mat-icon>
+                  <span>{{ order.items.length }} item(s)</span>
+                </div>
+
+                <div class="info-row">
+                  <mat-icon>payments</mat-icon>
+                  <span>${{ order.totalAmount.toFixed(2) }}</span>
+                </div>
+
+                <div class="info-row">
+                  <mat-icon>calendar_today</mat-icon>
+                  <span>{{ formatDate(order.createdAt) }}</span>
+                </div>
+
+                @if (order.sagaStatus) {
+                <div class="info-row saga">
+                  <mat-icon>{{ getSagaStatusIcon(order.sagaStatus) }}</mat-icon>
+                  <span>Saga: {{ sagaStatusLabels[order.sagaStatus] }}</span>
+                </div>
+                }
+
+                @if (order.cancellationReason) {
+                <div class="info-row reason">
+                  <mat-icon>info</mat-icon>
+                  <span>{{ order.cancellationReason }}</span>
+                </div>
+                }
+              </div>
+            </mat-card-content>
+
+            <mat-card-actions>
+              <button
+                mat-button
+                color="primary"
+                (click)="viewOrderDetails(order.id)"
+              >
+                <mat-icon>visibility</mat-icon>
+                View Details
+              </button>
+            </mat-card-actions>
+          </mat-card>
+          }
+        </div>
+        }
+
+        @if (!isLoadingFailed() && failedOrders().length === 0) {
+        <div class="no-data success">
+          <mat-icon>check_circle</mat-icon>
+          <h3>No failed orders</h3>
+          <p>All orders are processing successfully!</p>
+        </div>
+        }
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

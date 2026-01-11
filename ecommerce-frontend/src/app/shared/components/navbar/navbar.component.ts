@@ -74,6 +74,17 @@ import { UserInfo } from '../../../core/models/auth.model';
                 <span>My Orders</span>
               </button>
               <mat-divider></mat-divider>
+
+              <button mat-menu-item routerLink="/orders/create">
+                <mat-icon>add_shopping_cart</mat-icon>
+                <span>Create Order</span>
+              </button>
+
+              <button mat-menu-item routerLink="/orders">
+                <mat-icon>receipt_long</mat-icon>
+                <span>My Orders</span>
+              </button>
+
               <button mat-menu-item (click)="logout()">
                 <mat-icon>logout</mat-icon>
                 <span>Logout</span>

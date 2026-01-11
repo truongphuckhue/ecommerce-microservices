@@ -1,0 +1,184 @@
+<div class="order-list-container">
+  <!-- Header -->
+  <div class="page-header">
+    <h1>
+      <mat-icon>receipt_long</mat-icon>
+      My Orders
+    </h1>
+    <button mat-raised-button color="primary" (click)="createNewOrder()">
+      <mat-icon>add_shopping_cart</mat-icon>
+      Create New Order
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <mat-form-field appearance="outline">
+      <mat-label>Filter by Status</mat-label>
+      <mat-select 
+        [(ngModel)]="selectedStatus"
+        (selectionChange)="onStatusFilterChange()"
+      >
+        @for (option of statusOptions; track option.value) {
+          <mat-option [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+        }
+      </mat-select>
+      <mat-icon matPrefix>filter_list</mat-icon>
+    </mat-form-field>
+
+    <div class="results-count">
+      <mat-icon>shopping_bag</mat-icon>
+      {{ filteredOrders().length }} orders
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="60"></mat-spinner>
+      <p>Loading your orders...</p>
+    </div>
+  }
+
+  <!-- Orders List -->
+  @if (!isLoading() && filteredOrders().length > 0) {
+    <div class="orders-grid">
+      @for (order of filteredOrders(); track order.id) {
+        <mat-card class="order-card" (click)="viewOrderDetails(order.id)">
+          <mat-card-header>
+            <div class="order-header">
+              <div class="order-number">
+                <mat-icon>confirmation_number</mat-icon>
+                <span>{{ order.orderNumber }}</span>
+              </div>
+              <mat-chip 
+                [color]="statusColors[order.status]"
+                highlighted
+              >
+                <mat-icon>{{ getOrderStatusIcon(order.status) }}</mat-icon>
+                {{ statusLabels[order.status] }}
+              </mat-chip>
+            </div>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="order-info">
+              <!-- Date -->
+              <div class="info-row">
+                <mat-icon>calendar_today</mat-icon>
+                <div>
+                  <span class="label">Order Date</span>
+                  <span class="value">{{ formatDate(order.createdAt) }}</span>
+                </div>
+              </div>
+
+              <!-- Items Count -->
+              <div class="info-row">
+                <mat-icon>shopping_cart</mat-icon>
+                <div>
+                  <span class="label">Items</span>
+                  <span class="value">{{ order.items.length }} item(s)</span>
+                </div>
+              </div>
+
+              <!-- Total Amount -->
+              <div class="info-row total">
+                <mat-icon>payments</mat-icon>
+                <div>
+                  <span class="label">Total Amount</span>
+                  <span class="value">${{ order.totalAmount.toFixed(2) }}</span>
+                </div>
+              </div>
+
+              <!-- Payment Method -->
+              @if (order.paymentMethod) {
+                <div class="info-row">
+                  <mat-icon>credit_card</mat-icon>
+                  <div>
+                    <span class="label">Payment</span>
+                    <span class="value">{{ order.paymentMethod }}</span>
+                  </div>
+                </div>
+              }
+
+              <!-- Saga Status (for debugging) -->
+              @if (order.sagaStatus) {
+                <div class="info-row saga">
+                  <mat-icon>engineering</mat-icon>
+                  <div>
+                    <span class="label">Saga Status</span>
+                    <span class="value">{{ order.sagaStatus }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <!-- Items Preview -->
+            <mat-divider></mat-divider>
+            <div class="items-preview">
+              <h4>Items:</h4>
+              <div class="items-list">
+                @for (item of order.items.slice(0, 3); track $index) {
+                  <div class="item">
+                    <span class="item-name">{{ item.productName || 'Product #' + item.productId }}</span>
+                    <span class="item-qty">x{{ item.quantity }}</span>
+                    <span class="item-price">${{ (item.totalPrice || item.unitPrice * item.quantity).toFixed(2) }}</span>
+                  </div>
+                }
+                @if (order.items.length > 3) {
+                  <div class="more-items">
+                    +{{ order.items.length - 3 }} more item(s)
+                  </div>
+                }
+              </div>
+            </div>
+          </mat-card-content>
+
+          <mat-card-actions>
+            <button 
+              mat-button 
+              color="primary"
+              (click)="viewOrderDetails(order.id); $event.stopPropagation()"
+            >
+              <mat-icon>visibility</mat-icon>
+              View Details
+            </button>
+            
+            @if (canCancelOrder(order)) {
+              <button 
+                mat-button 
+                color="warn"
+                (click)="cancelOrder(order, $event)"
+              >
+                <mat-icon>cancel</mat-icon>
+                Cancel Order
+              </button>
+            }
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
+  }
+
+  <!-- No Orders -->
+  @if (!isLoading() && filteredOrders().length === 0) {
+    <div class="no-orders">
+      <mat-icon>shopping_bag</mat-icon>
+      <h3>No orders found</h3>
+      @if (selectedStatus()) {
+        <p>No orders with status: {{ statusLabels[selectedStatus()!] }}</p>
+        <button mat-raised-button color="primary" (click)="selectedStatus.set(null); onStatusFilterChange()">
+          Show All Orders
+        </button>
+      } @else {
+        <p>You haven't placed any orders yet</p>
+        <button mat-raised-button color="primary" (click)="createNewOrder()">
+          <mat-icon>add_shopping_cart</mat-icon>
+          Create Your First Order
+        </button>
+      }
+    </div>
+  }
+</div>
